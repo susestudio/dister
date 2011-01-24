@@ -7,12 +7,12 @@ module Dister
     end
 
     desc "create APPLIANCE_NAME", "create a new appliance named APPLIANCE_NAME"
-    method_option :base_system, :type => :string, :default => 'openSUSE_latest',
-                                :required => false
-    method_option :template, :type => :string, :default => 'JeOS',
-                             :required => false
-    method_option :arch, :type => :string, :default => 'i686',
-                         :required => false
+    method_option :base_system,
+      :type => :string, :default => 'openSUSE_latest', :required => false
+    method_option :template,
+      :type => :string, :default => 'JeOS', :required => false
+    method_option :arch,
+      :type => :string, :default => 'i686', :required => false
     def create(appliance_name)
       allowed_archs = %w(i686 x86_64)
       unless allowed_archs.include? options[:arch]

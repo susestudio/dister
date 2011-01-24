@@ -3,7 +3,7 @@ module Dister
     def self.options
       # NOTE: Since we're so far only using this once to establish a connection,
       # thats just fine. If we use it more often, store the info in a constant.
-      YAML.load_file("#{File.expand_path('.')}/.dister/auth.yml")
+      YAML.load_file("#{File.expand_path('~')}/.dister/auth.yml")
     end
 
     # Connect to SUSE Studio and verify credentials.
@@ -15,6 +15,7 @@ module Dister
         'https://susestudio.com/api/v1/user'
       )
       @connection.api_version
+      StudioApi::Util.configure_studio_connection @connection
       true
     rescue ActiveResource::UnauthorizedAccess
       @connection = nil
