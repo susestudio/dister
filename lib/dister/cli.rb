@@ -22,7 +22,7 @@ module Dister
       end
     end
 
-    desc "List all the templates available on SUSE Studio"
+    desc "templates", "List all the templates available on SUSE Studio"
     def templates
       core = Core.new
       core.list_templates
