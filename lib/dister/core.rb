@@ -26,28 +26,44 @@ module Dister
 
     # Creates a new appliance.
     # Returns the new appliance.
-    def create_appliance(name, template, arch)
-      templates = StudioApi::TemplateSet.find(:all).find {|s| s.name == "default" }.template
-      template = templates.find { |t| t.name == "SLED 11 SP1, KDE 4 desktop" }
-      StudioApi::Appliance.clone template.appliance_id,
-                                 :name => name,
-                                 :arch => arch
-    end
-
-    def list_templates
-      templates = StudioApi::TemplateSet.find(:all).find {|s| s.name == "default" }.template
-      templates.each do |t|
-        puts t.inspect
+    def create_appliance(name, template, basesystem, arch)
+      match = check_template_and_basesystem_availability(template, basesystem)
+      if match.nil?
+        exit 1
+      else
+        StudioApi::Appliance.clone match.appliance_id, :name => name,
+                                   :arch => arch
       end
     end
 
-    def base_systems
+    def templates
+      StudioApi::TemplateSet.find(:all).find {|s| s.name == "default" }.template
+    end
+
+    def basesystems
       b = []
-      StudioApi::TemplateSet.find(:all).find {|s| s.name == "default" }.template.each do |t|
+      templates.each do |t|
         b << t.basesystem unless b.include? t.basesystem
       end
-      puts b.inspect
       b
+    end
+
+    def check_template_and_basesystem_availability template, basesystem
+      available_templates = self.templates
+      match = available_templates.find do |t|
+        t.basesystem == basesystem && t.name.downcase.include?(template.downcase)
+      end
+      
+      if match.nil?
+        STDERR.puts "The #{basesystem} doesn't have the #{template} template."
+        STDERR.puts "Available templates are:"
+        available_templates.find_all do |t|
+          t.basesystem.downcase == basesystem.downcase
+        end.each do |t|
+          STDERR.puts "  - #{t.name}"
+        end
+      end
+      match
     end
   end
 end
