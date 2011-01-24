@@ -7,6 +7,7 @@ PATH
 GEM
   remote: http://rubygems.org/
   specs:
+    shoulda (2.11.3)
     thor (0.14.6)
 
 PLATFORMS
@@ -15,4 +16,5 @@ PLATFORMS
 DEPENDENCIES
   bundler (~> 1.0.0)
   dister!
+  shoulda
   thor (~> 0.14.0)
