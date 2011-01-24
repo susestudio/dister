@@ -1,10 +1,10 @@
-require 'thor'
-
 module Dister
   class Cli < Thor
     include Thor::Actions
 
-    def self.source_root; File.expand_path('../../',__FILE__); end
+    def self.source_root
+      File.expand_path('../../',__FILE__)
+    end
 
     desc "create APPLIANCE_NAME", "create a new appliance named APPLIANCE_NAME"
     method_option :base_system, :type => :string, :default => 'openSUSE_latest',

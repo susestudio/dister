@@ -1,13 +1,24 @@
-require 'studio_api'
-
 module Dister
   class Core
+    def self.options
+      # NOTE: Since we're so far only using this once to establish a connection,
+      # thats just fine. If we use it more often, store the info in a constant.
+      YAML.load_file("#{File.expand_path('.')}/.dister/auth.yml")
+    end
+
+    # Connect to SUSE Studio and verify credentials.
+    # Sets @connection for further use.
     def initialize
-      # TODO obtain these details from Options class
-      @connection = StudioApi::Connection.new('user',
-                                              'pwd',
-                                              'https://susestudio.com/api/v1/user')
-      StudioApi::Util.configure_studio_connection @connection
+      @connection = StudioApi::Connection.new(
+        Core.options['username'],
+        Core.options['api_key'],
+        'https://susestudio.com/api/v1/user'
+      )
+      @connection.api_version
+      true
+    rescue ActiveResource::UnauthorizedAccess
+      @connection = nil
+      false
     end
 
     # Creates a new appliance.

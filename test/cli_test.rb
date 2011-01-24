@@ -24,7 +24,7 @@ class CliTest < Test::Unit::TestCase
     end
   end
 
-  context "create" do
+  context "creating a new appliance" do
     should "refuse invalid archs" do
       assert_raise SystemExit do
         Dister::Cli.start(['create', 'foo','--arch', 'ppc'])
@@ -38,4 +38,3 @@ class CliTest < Test::Unit::TestCase
     end
   end
 end
-
