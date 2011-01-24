@@ -16,6 +16,7 @@ module Dister
           'https://susestudio.com/api/v1/user'
         )
         @connection.api_version
+        StudioApi::Util.configure_studio_connection @connection
         true
       rescue ActiveResource::UnauthorizedAccess
         @connection = nil
