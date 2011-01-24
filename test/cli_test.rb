@@ -23,5 +23,19 @@ class CliTest < Test::Unit::TestCase
       assert @out.empty?
     end
   end
+
+  context "create" do
+    should "refuse invalid archs" do
+      assert_raise SystemExit do
+        Dister::Cli.start(['create', 'foo','--arch', 'ppc'])
+      end
+    end
+
+    should "accept valid archs" do
+      assert_nothing_raised do
+        Dister::Cli.start(['create', 'foo','--arch', 'x86_64'])
+      end
+    end
+  end
 end
 
