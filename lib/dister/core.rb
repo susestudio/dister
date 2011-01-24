@@ -9,17 +9,18 @@ module Dister
     # Connect to SUSE Studio and verify credentials.
     # Sets @connection for further use.
     def initialize
-      @connection = StudioApi::Connection.new(
-        Core.options['username'],
-        Core.options['api_key'],
-        'https://susestudio.com/api/v1/user'
-      )
-      @connection.api_version
-      StudioApi::Util.configure_studio_connection @connection
-      true
-    rescue ActiveResource::UnauthorizedAccess
-      @connection = nil
-      false
+      begin
+        @connection = StudioApi::Connection.new(
+          Core.options['username'],
+          Core.options['api_key'],
+          'https://susestudio.com/api/v1/user'
+        )
+        @connection.api_version
+        true
+      rescue ActiveResource::UnauthorizedAccess
+        @connection = nil
+        false
+      end
     end
 
     # Creates a new appliance.
@@ -34,6 +35,18 @@ module Dister
 
     def list_templates
       templates = StudioApi::TemplateSet.find(:all).find {|s| s.name == "default" }.template
+      templates.each do |t|
+        puts t.inspect
+      end
+    end
+
+    def base_systems
+      b = []
+      StudioApi::TemplateSet.find(:all).find {|s| s.name == "default" }.template.each do |t|
+        b << t.basesystem unless b.include? t.basesystem
+      end
+      puts b.inspect
+      b
     end
   end
 end

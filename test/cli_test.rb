@@ -25,6 +25,13 @@ class CliTest < Test::Unit::TestCase
   end
 
   context "creating a new appliance" do
+    setup do
+      base_systems = ["11.1", "SLED10_SP2", "SLES10_SP2", "SLED11", "SLES11",
+                      "11.2", "SLES11_SP1", "SLED11_SP1", "11.3", "SLED10_SP3",
+                      "SLES10_SP3", "SLES11_SP1_VMware"]
+      Dister::Core.any_instance.stubs(:base_systems).returns(base_systems)
+    end
+
     should "refuse invalid archs" do
       assert_raise SystemExit do
         Dister::Cli.start(['create', 'foo','--arch', 'ppc'])
