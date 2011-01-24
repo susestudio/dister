@@ -1,0 +1,231 @@
+--- 
+38: 
+  name: SLED 10 SP3, KDE 3 desktop
+  basesystem: SLED10_SP3
+  appliance_id: "272626"
+  description: SLED 10 SP3, with KDE
+27: 
+  name: SLES 11, Server
+  basesystem: SLES11
+  appliance_id: "202461"
+  description: SLES 11
+16: 
+  name: openSUSE 11.2, Minimal X
+  basesystem: "11.2"
+  appliance_id: "123665"
+  description: Graphical system + IceWM
+5: 
+  name: openSUSE 11.1, GNOME desktop
+  basesystem: "11.1"
+  appliance_id: "2162"
+  description: Base system + GNOME
+44: 
+  name: SLES 11 SP1, VMware
+  basesystem: SLES11_SP1_VMware
+  appliance_id: "307097"
+  description: SLES 11 SP1, VMware branded
+33: 
+  name: openSUSE 11.3, GNOME desktop
+  basesystem: "11.3"
+  appliance_id: "232521"
+  description: Base system + GNOME
+22: 
+  name: SLED 11 SP1, GNOME desktop
+  basesystem: SLED11_SP1
+  appliance_id: "202446"
+  description: SLED 11 SP1, with GNOME
+11: 
+  name: SLES 11, Server
+  basesystem: SLES11
+  appliance_id: "14775"
+  description: SLES 11
+0: 
+  name: openSUSE 11.1, Just enough OS (JeOS)
+  basesystem: "11.1"
+  appliance_id: "3505"
+  description: Tiny, minimalistic appliances
+39: 
+  name: SLED 10 SP3, GNOME desktop
+  basesystem: SLED10_SP3
+  appliance_id: "272627"
+  description: SLED 10 SP3, with GNOME
+28: 
+  name: SLED 11 SP1, GNOME desktop
+  basesystem: SLED11_SP1
+  appliance_id: "202476"
+  description: SLED 11 SP1, with GNOME
+17: 
+  name: openSUSE 11.2, KDE 4 desktop
+  basesystem: "11.2"
+  appliance_id: "123666"
+  description: Base system + KDE 4
+6: 
+  name: SLED 10, KDE 3 desktop
+  basesystem: SLED10_SP2
+  appliance_id: "14769"
+  description: SLED 10, with KDE
+45: 
+  name: SLES 11 SP1, VMware
+  basesystem: SLES11_SP1_VMware
+  appliance_id: "307126"
+  description: SLES 11 SP1, VMware branded
+34: 
+  name: SLED 11, KDE 4 desktop
+  basesystem: SLED11
+  appliance_id: "255146"
+  description: SLED 11, with KDE 4
+23: 
+  name: SLED 11, KDE 4 desktop
+  basesystem: SLED11
+  appliance_id: "202458"
+  description: SLED 11, with KDE 4
+12: 
+  name: SLES 11, Just enough OS (JeOS)
+  basesystem: SLES11
+  appliance_id: "26667"
+  description: Minimal SLES
+1: 
+  name: openSUSE 11.1, Server
+  basesystem: "11.1"
+  appliance_id: "2158"
+  description: A text-only base
+40: 
+  name: SLES 10 SP2, Server
+  basesystem: SLES10_SP2
+  appliance_id: "272628"
+  description: SLES 10 SP2
+29: 
+  name: openSUSE 11.3, Just enough OS (JeOS)
+  basesystem: "11.3"
+  appliance_id: "232516"
+  description: Tiny, minimalistic appliances
+18: 
+  name: openSUSE 11.2, GNOME desktop
+  basesystem: "11.2"
+  appliance_id: "123667"
+  description: Base system + GNOME
+7: 
+  name: SLED 10, GNOME desktop
+  basesystem: SLED10_SP2
+  appliance_id: "14770"
+  description: SLED 10, with GNOME
+35: 
+  name: SLED 11, GNOME desktop
+  basesystem: SLED11
+  appliance_id: "255147"
+  description: SLED 11, with GNOME
+24: 
+  name: SLED 11, GNOME desktop
+  basesystem: SLED11
+  appliance_id: "202459"
+  description: SLED 11, with GNOME
+13: 
+  name: SLES 11, Just enough OS (JeOS)
+  basesystem: SLES11
+  appliance_id: "26694"
+  description: Minimal SLES
+2: 
+  name: openSUSE 11.1, Minimal X
+  basesystem: "11.1"
+  appliance_id: "2159"
+  description: Graphical system + IceWM
+41: 
+  name: SLES 10 SP3, Server
+  basesystem: SLES10_SP3
+  appliance_id: "272629"
+  description: SLES 10 SP3
+30: 
+  name: openSUSE 11.3, Server
+  basesystem: "11.3"
+  appliance_id: "232517"
+  description: A text-only base
+19: 
+  name: SLES 11 SP1, Just enough OS (JeOS)
+  basesystem: SLES11_SP1
+  appliance_id: "202443"
+  description: Minimal SLES 11 SP1
+8: 
+  name: SLES 10, Server
+  basesystem: SLES10_SP2
+  appliance_id: "14771"
+  description: SLES 10
+36: 
+  name: SLED 10 SP2, KDE 3 desktop
+  basesystem: SLED10_SP2
+  appliance_id: "272624"
+  description: SLED 10 SP2, with KDE
+25: 
+  name: SLES 11, Just enough OS (JeOS)
+  basesystem: SLES11
+  appliance_id: "202460"
+  description: Minimal SLES
+14: 
+  name: openSUSE 11.2, Just enough OS (JeOS)
+  basesystem: "11.2"
+  appliance_id: "123663"
+  description: Tiny, minimalistic appliances
+3: 
+  name: openSUSE 11.1, KDE 3 desktop
+  basesystem: "11.1"
+  appliance_id: "2160"
+  description: Base system + KDE 3
+42: 
+  name: SLES 11 SP1, VMware
+  basesystem: SLES11_SP1_VMware
+  appliance_id: "294108"
+  description: SLES 11 SP1, VMware branded
+31: 
+  name: openSUSE 11.3, Minimal X
+  basesystem: "11.3"
+  appliance_id: "232518"
+  description: Graphical system + IceWM
+20: 
+  name: SLES 11 SP1, Server
+  basesystem: SLES11_SP1
+  appliance_id: "202444"
+  description: SLES 11 SP1
+9: 
+  name: SLED 11, KDE 4 desktop
+  basesystem: SLED11
+  appliance_id: "14772"
+  description: SLED 11, with KDE 4
+37: 
+  name: SLED 10 SP2, GNOME desktop
+  basesystem: SLED10_SP2
+  appliance_id: "272625"
+  description: SLED 10 SP2, with GNOME
+26: 
+  name: openSUSE 11.2, Minimal X
+  basesystem: "11.2"
+  appliance_id: "160586"
+  description: Graphical system + IceWM
+15: 
+  name: openSUSE 11.2, Server
+  basesystem: "11.2"
+  appliance_id: "123664"
+  description: A text-only base
+4: 
+  name: openSUSE 11.1, KDE 4 desktop
+  basesystem: "11.1"
+  appliance_id: "2161"
+  description: Base system + KDE 4
+43: 
+  name: SLES 11 SP1, VMware
+  basesystem: SLES11_SP1_VMware
+  appliance_id: "295918"
+  description: SLES 11 SP1, VMware branded
+32: 
+  name: openSUSE 11.3, KDE 4 desktop
+  basesystem: "11.3"
+  appliance_id: "232520"
+  description: Base system + KDE 4
+21: 
+  name: SLED 11 SP1, KDE 4 desktop
+  basesystem: SLED11_SP1
+  appliance_id: "202445"
+  description: SLED 11 SP1, with KDE 4
+10: 
+  name: SLED 11, GNOME desktop
+  basesystem: SLED11
+  appliance_id: "14773"
+  description: SLED 11, with GNOME
