@@ -31,8 +31,10 @@ module Dister
       if match.nil?
         exit 1
       else
-        StudioApi::Appliance.clone match.appliance_id, :name => name,
-                                   :arch => arch
+        app = StudioApi::Appliance.clone match.appliance_id, :name => name,
+                                         :arch => arch
+        puts "SUSE Studio appliance successfull created:"
+        puts "  #{app.edit_url}"
       end
     end
 
