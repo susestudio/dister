@@ -15,6 +15,7 @@ Gem::Specification.new do |s|
   s.rubyforge_project         = "dister"
   
   s.add_dependency "thor", "~>0.14.0"
+  s.add_dependency "studio_api"
   s.add_development_dependency "bundler", "~>1.0.0"
   s.add_development_dependency "shoulda"
     s.files        = `git ls-files`.split("\n")
