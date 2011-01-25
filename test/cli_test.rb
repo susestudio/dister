@@ -1,10 +1,8 @@
 require File.expand_path('../test_helper', __FILE__)
-require 'yaml'
-
 
 if !defined? FakeTemplates
   Struct.new("FakeTemplate", :name, :basesystem, :appliance_id, :description)
-  
+
   FakeTemplates = []
   YAML.load_file(File.expand_path('../fixtures/templates.yml', __FILE__)).each do |item|
     info = item.last

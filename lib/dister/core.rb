@@ -1,29 +1,32 @@
-require 'progressbar'
-
-
 module Dister
   class Core
-    def self.options
-      # NOTE: Since we're so far only using this once to establish a connection,
-      # thats just fine. If we use it more often, store the info in a constant.
-      YAML.load_file("#{File.expand_path('~')}/.dister/auth.yml")
-    end
+
+    API_PATH = 'https://susestudio.com/api/v1/user'
 
     # Connect to SUSE Studio and verify credentials.
     # Sets @connection for further use.
     def initialize
-      begin
-        @connection = StudioApi::Connection.new(
-          Core.options['username'],
-          Core.options['api_key'],
-          'https://susestudio.com/api/v1/user'
-        )
-        @connection.api_version
-        StudioApi::Util.configure_studio_connection @connection
-        true
-      rescue ActiveResource::UnauthorizedAccess
-        @connection = nil
-        false
+      @global_options ||= Options.new
+      credentials = @global_options.credentials
+      @connection = StudioApi::Connection.new(
+        credentials['username'],
+        credentials['api_key'],
+        API_PATH
+      )
+      # Try the connection once to determine whether credentials are correct.
+      @connection.api_version
+      StudioApi::Util.configure_studio_connection @connection
+      true
+    rescue ActiveResource::UnauthorizedAccess
+      puts 'A connection to SUSE Studio could not be established.'
+      keep_trying = Thor::Shell::Basic.new.ask(
+        'Would you like to re-enter your credentials and try again? (y/n)'
+      )
+      if keep_trying == 'y'
+        @global_options.update_credentials
+        retry
+      else
+        abort('Exiting dister.')
       end
     end
 
@@ -48,7 +51,7 @@ module Dister
                                           :image_type => "oem")
       build.save
       pbar = ProgressBar.new "Building", 100
-      
+
       build.reload
       while build.state != "finished"
         pbar.set build.percent.to_i
@@ -77,7 +80,7 @@ module Dister
       match = available_templates.find do |t|
         t.basesystem == basesystem && t.name.downcase.include?(template.downcase)
       end
-      
+
       if match.nil?
         STDERR.puts "The #{basesystem} doesn't have the #{template} template."
         STDERR.puts "Available templates are:"

@@ -3,8 +3,9 @@ require 'test/unit'
 require 'mocha'
 require 'shoulda'
 require 'stringio'
+require 'yaml'
 require File.expand_path('../../lib/dister',__FILE__)
- 
+
 class Object
   def capture(stream)
     begin
