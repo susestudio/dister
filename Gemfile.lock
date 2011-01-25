@@ -2,6 +2,7 @@ PATH
   remote: .
   specs:
     dister (0.1.0)
+      curb
       progressbar
       studio_api
       thor (~> 0.14.0)
@@ -12,6 +13,7 @@ GEM
     activeresource (2.3.8)
       activesupport (= 2.3.8)
     activesupport (2.3.8)
+    curb (0.6.2.1)
     mocha (0.9.4)
       rake
     progressbar (0.9.0)
@@ -28,6 +30,7 @@ PLATFORMS
 
 DEPENDENCIES
   bundler (~> 1.0.0)
+  curb
   dister!
   mocha
   progressbar
