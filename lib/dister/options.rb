@@ -17,7 +17,7 @@ module Dister
       global_options_dir = File.dirname(GLOBAL_OPTIONS_PATH)
       Dir.mkdir(global_options_dir) unless File.directory?(global_options_dir)
       File.new(GLOBAL_OPTIONS_PATH, 'w')
-      update_credentials
+      retry
     end
 
     # Picks credentials from @global_options.
@@ -32,10 +32,8 @@ module Dister
     def update_credentials
       puts 'Please enter your SUSE Studio credentials (https://susestudio.com/user/show_api_key).'
       shell = Thor::Shell::Basic.new
-      @global_options_hash = {
-        'username' => shell.ask("Username:\t"),
-        'api_key' => shell.ask("API key:\t")
-      }
+      @global_options_hash['username'] = shell.ask("Username:\t")
+      @global_options_hash['api_key'] = shell.ask("API key:\t")
       File.open(GLOBAL_OPTIONS_PATH, 'w') do |out|
         YAML.dump(@global_options_hash, out)
       end
