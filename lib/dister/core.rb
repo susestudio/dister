@@ -43,6 +43,7 @@ module Dister
     end
 
     def build appliance_id
+      #TODO: build using another format
       build = StudioApi::RunningBuild.new(:appliance_id => appliance_id,
                                           :image_type => "oem")
       build.save

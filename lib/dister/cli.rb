@@ -7,6 +7,7 @@ module Dister
     end
 
     VALID_TEMPLATES = %w(JeOS Server X Gnome KDE)
+    VALID_FOMATS = %w(oem vmx iso xen) #TODO: add other formats
 
     desc "init", "Creates all files needed by Dister. Make sure to run it from Rails root"
     def init
@@ -46,6 +47,33 @@ module Dister
         puts "Appliance successfully built."
       else
         puts "Something went wrong."
+      end
+    end
+
+    desc "format OPERATION FORMAT", "Enables building of FORMAT"
+    def format(operation,format)
+      valid_operations = %w(add rm)
+      ensure_valid_option operation, valid_operations, "format"
+      case format
+      when "add"
+        ensure_valid_option format, VALID_FOMATS, "format" 
+        #TODO: local options store format
+      when "rm"
+        #TODO: local options: remove format
+      end
+    end
+
+    desc "formats", "List all the available formats"
+    method_option :all, :type => :boolean, :default => false,
+                        :required => false
+    def formats
+      if options[:all]
+        VALID_FOMATS.each do |f|
+          puts "  #{f}"
+        end
+      else
+        #TODO: local options: show enabled formats
+      end
     end
 
     desc "templates", "List all the templates available on SUSE Studio"
@@ -64,6 +92,9 @@ module Dister
     end
 
     private
+
+    # Ensures actual_value is allowed. If not prints an error message to
+    # stderr and exits
     def ensure_valid_option actual_value, allowed_values, option_name
       if allowed_values.find{|v| v.downcase == actual_value.downcase}.nil?
         STDERR.puts "#{actual_value} is not a valid value for #{option_name}"
