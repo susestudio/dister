@@ -1,4 +1,5 @@
 module Dister
+
   class Core
 
     API_PATH = 'https://susestudio.com/api/v1/user'
@@ -37,8 +38,9 @@ module Dister
       if match.nil?
         exit 1
       else
-        app = StudioApi::Appliance.clone match.appliance_id, :name => name,
-                                         :arch => arch
+        app = StudioApi::Appliance.clone(
+          match.appliance_id, {:name => name, :arch => arch}
+        )
         puts "SUSE Studio appliance successfull created:"
         puts "  #{app.edit_url}"
         #TODO store id inside a yml file
@@ -47,9 +49,10 @@ module Dister
 
     def build appliance_id
       #TODO: build using another format
-      build = StudioApi::RunningBuild.new(:appliance_id => appliance_id,
-                                          :image_type => "oem")
-      build.save
+      build = StudioApi::RunningBuild.create(
+        :appliance_id => appliance_id,
+        :image_type => "oem"
+      )
       pbar = ProgressBar.new "Building", 100
 
       build.reload
@@ -64,15 +67,11 @@ module Dister
     end
 
     def templates
-      StudioApi::TemplateSet.find(:all).find {|s| s.name == "default" }.template
+      StudioApi::TemplateSet.find(:first, :conditions => {:name => "default"}).template
     end
 
     def basesystems
-      b = []
-      templates.each do |t|
-        b << t.basesystem unless b.include? t.basesystem
-      end
-      b
+      templates.collect(&:basesystem).uniq
     end
 
     def check_template_and_basesystem_availability template, basesystem
@@ -93,4 +92,5 @@ module Dister
       match
     end
   end
+
 end

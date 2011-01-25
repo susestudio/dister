@@ -15,7 +15,9 @@ if !defined? FakeTemplates
 end
 
 class CliTest < Test::Unit::TestCase
+
   context "no parameter passed" do
+
     setup do
       @out = capture(:stdout) { Dister::Cli.start() }
     end
@@ -23,9 +25,11 @@ class CliTest < Test::Unit::TestCase
     should "show help message" do
       assert @out.include?("Tasks:")
     end
+
   end
 
   context "wrong param" do
+
     setup do
       @out = capture(:stdout) do
         @err = capture(:stderr) { Dister::Cli.start(['foo']) }
@@ -36,9 +40,11 @@ class CliTest < Test::Unit::TestCase
       assert_equal 'Could not find task "foo".', @err.chomp
       assert @out.empty?
     end
+
   end
 
   context "creating a new appliance" do
+
     setup do
       Dister::Core.any_instance.stubs(:templates).returns(FakeTemplates)
       basesystems = ["11.1", "SLED10_SP2", "SLES10_SP2", "SLED11", "SLES11",
@@ -48,6 +54,7 @@ class CliTest < Test::Unit::TestCase
     end
 
     should "refuse invalid archs" do
+      STDERR.stubs(:puts)
       assert_raise SystemExit do
         Dister::Cli.start(['create', 'foo','--arch', 'ppc'])
       end
@@ -70,6 +77,7 @@ class CliTest < Test::Unit::TestCase
     end
 
     should "detect bad combination of template and basesystem" do
+      STDERR.stubs(:puts)
       StudioApi::Appliance.stubs(:clone).returns(true)
       assert_raise(SystemExit) do
         Dister::Cli.start(['create', 'foo', "--template", "jeos",
@@ -78,4 +86,5 @@ class CliTest < Test::Unit::TestCase
     end
 
   end
+
 end

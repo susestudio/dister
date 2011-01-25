@@ -1,4 +1,5 @@
 module Dister
+
   class Options
 
     GLOBAL_OPTIONS_PATH = "#{File.expand_path('~')}/.dister/options.yml"
@@ -41,4 +42,5 @@ module Dister
     end
 
   end
+
 end

@@ -1,13 +1,17 @@
 module Dister
-  class Cli < Thor
-    include Thor::Actions
 
-    def self.source_root
-      File.expand_path('../../',__FILE__)
-    end
+  class Cli < Thor
 
     VALID_TEMPLATES = %w(JeOS Server X Gnome KDE)
     VALID_FOMATS = %w(oem vmx iso xen) #TODO: add other formats
+
+    include Thor::Actions
+
+    # Returns Dister's root directory.
+    # NOTE: Some of Thor's actions require this method to be defined.
+    def self.source_root
+      File.expand_path('../../',__FILE__)
+    end
 
     desc "init", "Creates all files needed by Dister. Make sure to run it from Rails root"
     def init
@@ -16,12 +20,12 @@ module Dister
     end
 
     desc "create APPLIANCE_NAME", "create a new appliance named APPLIANCE_NAME"
-    method_option :basesystem, :type => :string, :default => nil,
-                                :required => false
-    method_option :template, :type => :string, :default => 'JeOS',
-                             :required => false
-    method_option :arch, :type => :string, :default => 'i686',
-                         :required => false
+    method_option :basesystem,
+      :type => :string, :default => nil, :required => false
+    method_option :template,
+      :type => :string, :default => 'JeOS', :required => false
+    method_option :arch,
+      :type => :string, :default => 'i686', :required => false
     def create(appliance_name)
       core = Core.new
 
@@ -35,9 +39,9 @@ module Dister
       ensure_valid_option options[:template], VALID_TEMPLATES, "template"
 
       core.create_appliance appliance_name, options[:template],
-                            basesystem, options[:arch] 
+                            basesystem, options[:arch]
     end
-    
+
     desc "build", "Builds the appliance"
     def build
       #TODO: make sure the appliance has been created
@@ -56,7 +60,7 @@ module Dister
       ensure_valid_option operation, valid_operations, "format"
       case format
       when "add"
-        ensure_valid_option format, VALID_FOMATS, "format" 
+        ensure_valid_option format, VALID_FOMATS, "format"
         #TODO: local options store format
       when "rm"
         #TODO: local options: remove format
@@ -64,8 +68,8 @@ module Dister
     end
 
     desc "formats", "List all the available formats"
-    method_option :all, :type => :boolean, :default => false,
-                        :required => false
+    method_option :all,
+      :type => :boolean, :default => false, :required => false
     def formats
       if options[:all]
         VALID_FOMATS.each do |f|
@@ -78,17 +82,12 @@ module Dister
 
     desc "templates", "List all the templates available on SUSE Studio"
     def templates
-      VALID_TEMPLATES.sort.each do |t|
-        puts t
-      end
+      puts VALID_TEMPLATES.sort
     end
 
     desc "basesystems", "List all the base systems available on SUSE Studio"
     def basesystems
-      core = Core.new
-      core.basesystems.sort.each do |b|
-        puts b
-      end
+      puts Core.new.basesystems.sort
     end
 
     private
@@ -103,4 +102,5 @@ module Dister
       end
     end
   end
+
 end
