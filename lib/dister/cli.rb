@@ -8,6 +8,12 @@ module Dister
 
     VALID_TEMPLATES = %w(JeOS Server X Gnome KDE)
 
+    desc "init", "Creates all files needed by Dister. Make sure to run it from Rails root"
+    def init
+      #TODO look for authentication
+      #create .dister directory containing appliance-specific setting
+    end
+
     desc "create APPLIANCE_NAME", "create a new appliance named APPLIANCE_NAME"
     method_option :basesystem, :type => :string, :default => nil,
                                 :required => false
@@ -31,10 +37,21 @@ module Dister
                             basesystem, options[:arch] 
     end
     
+    desc "build", "Builds the appliance"
+    def build
+      #TODO: make sure the appliance has been created
+      #TODO: read appliance ID from the settings file
+      appliance_id = 318430
+      if (Core.new.build appliance_id)
+        puts "Appliance successfully built."
+      else
+        puts "Something went wrong."
+    end
+
     desc "templates", "List all the templates available on SUSE Studio"
     def templates
       VALID_TEMPLATES.sort.each do |t|
-       puts t
+        puts t
       end
     end
 

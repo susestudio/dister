@@ -1,3 +1,6 @@
+require 'progressbar'
+
+
 module Dister
   class Core
     def self.options
@@ -35,7 +38,25 @@ module Dister
                                          :arch => arch
         puts "SUSE Studio appliance successfull created:"
         puts "  #{app.edit_url}"
+        #TODO store id inside a yml file
       end
+    end
+
+    def build appliance_id
+      build = StudioApi::RunningBuild.new(:appliance_id => appliance_id,
+                                          :image_type => "oem")
+      build.save
+      pbar = ProgressBar.new "Building", 100
+      
+      build.reload
+      while build.state != "finished"
+        pbar.set build.percent.to_i
+        sleep 5
+        build.reload
+      end
+      pbar.finish
+      #TODO: what happens if there's a build error?
+      true
     end
 
     def templates
