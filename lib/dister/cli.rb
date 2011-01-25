@@ -54,6 +54,56 @@ module Dister
       end
     end
 
+    desc "download", "Download your appliance."
+    def download
+      #TODO: make sure the appliance has been created
+      #TODO: read appliance ID from the settings file
+      appliance_id = 318430
+      core = Core.new
+      builds = core.builds appliance_id
+      to_download = []
+      if builds.size  == 0
+        puts "There are no builds yet, se the build command."
+      elsif builds.size == 1
+        to_download << builds.first
+      else
+        builds.each_with_index do |build, index|
+          puts "#{index+1}) #{build.to_s}"
+        end
+        puts "#{builds.size+1}) All of them."
+        puts "#{builds.size+2}) None."
+
+        begin
+          puts "Which appliance do you want to download? [1-#{builds.size+1}]"
+          choice = STDIN.gets.chomp
+        end while (choice.to_i > (builds.size+2))
+
+        if choice.to_i == (builds.size+2)
+          # none selected
+          exit 0
+        elsif choice.to_i == (builds.size+1)
+          # all selected
+          to_download = builds
+        else
+          to_download << builds[choice.to_i-1]
+        end
+
+        to_download.each do |b|
+          puts "Going to download #{b.to_s}"
+          d = Downloader.new(b.download_url.sub("https:", "http:"), "Downloading", b.compressed_image_size.to_i)
+          begin
+            d.start
+          rescue
+            STDOUT.puts
+            STDERR.puts
+            STDERR.flush
+            STDERR.puts $!
+            exit 1
+          end
+        end
+      end
+    end
+
     desc "format OPERATION FORMAT", "Enables building of FORMAT"
     def format(operation,format)
       valid_operations = %w(add rm)

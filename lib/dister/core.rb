@@ -66,6 +66,10 @@ module Dister
       true
     end
 
+    def builds appliance_id
+      StudioApi::Build.find(:all, :params => {:appliance_id => appliance_id})
+    end
+
     def templates
       StudioApi::TemplateSet.find(:first, :conditions => {:name => "default"}).template
     end
