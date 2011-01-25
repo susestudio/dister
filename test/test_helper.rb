@@ -1,8 +1,9 @@
 require 'rubygems'
-require 'test/unit'
+require 'fakefs/safe'
 require 'mocha'
 require 'shoulda'
 require 'stringio'
+require 'test/unit'
 require 'yaml'
 require File.expand_path('../../lib/dister',__FILE__)
 
@@ -19,3 +20,20 @@ class Object
     result
   end
 end
+
+module StudioApi
+  class Connection
+    def initialize username, key, api_url
+      true
+    end
+
+    def api_version
+    end
+  end
+
+  class Util
+    def self.configure_studio_connection connection
+    end
+  end
+end
+
