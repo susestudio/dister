@@ -1,7 +1,8 @@
+require 'fileutils'
+
 module Dister
-
   class Options
-
+    
     GLOBAL_OPTIONS_PATH = "#{File.expand_path('~')}/.dister/options.yml"
 
     # On creating a new instance of Options, the first thing to do is to ensure,
@@ -16,7 +17,7 @@ module Dister
     rescue Errno::ENOENT
       # File does not exist.
       global_options_dir = File.dirname(GLOBAL_OPTIONS_PATH)
-      Dir.mkdir(global_options_dir) unless File.directory?(global_options_dir)
+      FileUtils.mkdir_p(global_options_dir) unless File.exists?(global_options_dir)
       File.new(GLOBAL_OPTIONS_PATH, 'w')
       retry
     end
