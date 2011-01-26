@@ -131,9 +131,11 @@ module Dister
       puts Core.new.basesystems.sort
     end
 
-    desc "bundle", "Fetch all required gems (using bundler)."
+    desc "bundle", "Bundles the application and all required gems."
     def bundle
-      Core.new.package_gems
+      core = Core.new
+      core.package_gems
+      core.package_app
     end
 
     private

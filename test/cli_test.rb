@@ -101,6 +101,7 @@ class CliTest < Test::Unit::TestCase
 
       should 'package all required gems' do
         Dister::Core.any_instance.expects(:package_gems).once
+        Dister::Core.any_instance.expects(:package_app).once
         Dister::Cli.start ['bundle']
       end
 

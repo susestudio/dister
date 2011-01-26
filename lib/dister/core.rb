@@ -116,7 +116,7 @@ module Dister
     def file_upload filename, appliance_id, options={}
       if File.exists? filename
         options[:appliance_id] = appliance_id
-        File.open (filename) do |file|
+        File.open(filename) do |file|
           StudioApi::File.upload file, options
         end
         true
@@ -129,7 +129,21 @@ module Dister
     # Use bundler to download and package all required gems for the app.
     def package_gems
       puts 'Packaging gems...'
-      system "#{APP_ROOT}/bundle package"
+      system "cd #{APP_ROOT}"
+      system "rm -R vendor/cache" if File.exists?("#{APP_ROOT}/vendor/cache")
+      system 'bundle package'
+      puts "Done!"
+    end
+
+    # Creates a tarball that holds the application's source-files.
+    # Previously packaged versions get overwritten.
+    def package_app
+      puts 'Packaging application...'
+      system "cd #{APP_ROOT}"
+      package = "./.dister/application.tar.gz"
+      system "rm #{package}" if File.exists?(package)
+      system "tar -czf #{package} . --exclude=.dister"
+      puts "Done!"
     end
 
     private
