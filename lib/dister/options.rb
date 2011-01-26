@@ -2,44 +2,78 @@ require 'fileutils'
 
 module Dister
   class Options
-    
-    GLOBAL_OPTIONS_PATH = "#{File.expand_path('~')}/.dister/options.yml"
 
-    # On creating a new instance of Options, the first thing to do is to ensure,
-    # that the user has submitted his credentials for SUSE Studio.
+    GLOBAL_PATH = "#{File.expand_path('~')}/.dister"
+    LOCAL_PATH = "#{File.expand_path('.')}/.dister/options.yml"
+
+    # Read global and local option files.
     def initialize
-      # NOTE: Since we're so far only reading this file once to establish a
-      # connection, that's just fine. If we end up needing it to use it more
-      # often, store the info in a constant.
-      @global_options_hash = YAML.load_file(GLOBAL_OPTIONS_PATH)
+      # Global options hold the user's credentials to access SUSE Studio.
+      # They are stored inside the user's home directory.
+      @global = read_options_from_file(GLOBAL_PATH)
+      # Local options hold application specific data (e.g. appliance_id)
+      # They are stored inside the application's root directory.
+      @local = read_options_from_file(LOCAL_PATH)
+    end
+
+    # Returns a hash consisting of both global and local options.
+    # All options can be read through this method.
+    # NOTE: Local options override global options.
+    def provide
+      @global.merge(@local)
+    end
+
+    # Stores a specified option_key inside its originating options file.
+    def store(option_key, option_value)
+      if determine_options_file(option_key) == 'local'
+        @local[option_key] = option_value
+        options_hash = @local
+        file_path = LOCAL_PATH
+      else
+        @global[option_key] = option_value
+        options_hash = @global
+        file_path = GLOBAL_PATH
+      end
+      write_options_to_file(options_hash, file_path)
+    end
+
+    private
+
+    # Reads from global or local options file and returns an options hash.
+    def read_options_from_file(file_path)
+      values_hash = YAML.load_file(file_path)
       # In the unlikely case that the options file is empty, return an empty hash.
-      @global_options_hash = {} unless @global_options_hash
+      values_hash ? values_hash : {}
     rescue Errno::ENOENT
       # File does not exist.
-      global_options_dir = File.dirname(GLOBAL_OPTIONS_PATH)
-      FileUtils.mkdir_p(global_options_dir) unless File.exists?(global_options_dir)
-      File.new(GLOBAL_OPTIONS_PATH, 'w')
+      options_dir = File.dirname(file_path)
+      Dir.mkdir(options_dir) unless File.directory?(options_dir)
+      File.new(file_path, 'w')
       retry
     end
 
-    # Picks credentials from @global_options.
-    def credentials
-      {
-        'username' => @global_options_hash['username'],
-        'api_key' => @global_options_hash['api_key']
-      }
+    # Writes an options_hash back to a specified options file.
+    def write_options_to_file(options_hash, file_path)
+      File.open(file_path, 'w') do |out|
+        YAML.dump(options_hash, out)
+      end
     end
 
-    # Updates a user's credentials and stores them inside the global options file.
-    def update_credentials
-      puts 'Please enter your SUSE Studio credentials (https://susestudio.com/user/show_api_key).'
-      shell = Thor::Shell::Basic.new
-      @global_options_hash['username'] = shell.ask("Username:\t")
-      @global_options_hash['api_key'] = shell.ask("API key:\t")
-      File.open(GLOBAL_OPTIONS_PATH, 'w') do |out|
-        YAML.dump(@global_options_hash, out)
+    # Determines to which file an option gets written.
+    def determine_options_file(option_key)
+      # Search in local options first, since they override global options.
+      case option_key
+        when @local.keys.include?(option_key) : 'local'
+        when @global.keys.include?(option_key) : 'global'
+        else
+          if ['username', 'api_key'].include?(option_key)
+            # Credentials are stored globally per default.
+            'global'
+          else
+            # New options get stored locally.
+            'local'
+          end
       end
-      @global_options_hash
     end
 
   end

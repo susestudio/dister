@@ -4,14 +4,15 @@ module Dister
 
     API_PATH = 'https://susestudio.com/api/v1/user'
 
-    # Connect to SUSE Studio and verify credentials.
-    # Sets @connection for further use.
+    # Connect to SUSE Studio and verify the user's credentials.
+    # Sets @dister_options, @shell and @connection for further use.
     def initialize
-      @global_options ||= Options.new
-      credentials = @global_options.credentials
+      @dister_options ||= Options.new
+      options_hash = @dister_options.provide
+      @shell = Thor::Shell::Basic.new
       @connection = StudioApi::Connection.new(
-        credentials['username'],
-        credentials['api_key'],
+        options_hash['username'],
+        options_hash['api_key'],
         API_PATH
       )
       # Try the connection once to determine whether credentials are correct.
@@ -20,15 +21,20 @@ module Dister
       true
     rescue ActiveResource::UnauthorizedAccess
       puts 'A connection to SUSE Studio could not be established.'
-      keep_trying = Thor::Shell::Basic.new.ask(
+      keep_trying = @shell.ask(
         'Would you like to re-enter your credentials and try again? (y/n)'
       )
       if keep_trying == 'y'
-        @global_options.update_credentials
+        update_credentials
         retry
       else
         abort('Exiting dister.')
       end
+    end
+
+    # Gets currently set options.
+    def options
+      @dister_options.provide
     end
 
     # Creates a new appliance.
@@ -43,7 +49,7 @@ module Dister
         )
         puts "SUSE Studio appliance successfull created:"
         puts "  #{app.edit_url}"
-        #TODO store id inside a yml file
+        @dister_options.store('appliance_id', app.id)
       end
     end
 
@@ -95,6 +101,16 @@ module Dister
       end
       match
     end
+
+    private
+
+    # Updates a user's credentials and stores them inside the global options file.
+    def update_credentials
+      puts 'Please enter your SUSE Studio credentials (https://susestudio.com/user/show_api_key).'
+      @dister_options.store('username', @shell.ask("Username:\t"))
+      @dister_options.store('api_key', @shell.ask("API key:\t"))
+    end
+
   end
 
 end

@@ -36,4 +36,3 @@ module StudioApi
     end
   end
 end
-
