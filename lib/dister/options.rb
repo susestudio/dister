@@ -47,7 +47,7 @@ module Dister
     rescue Errno::ENOENT
       # File does not exist.
       options_dir = File.dirname(file_path)
-      Dir.mkdir(options_dir) unless File.directory?(options_dir)
+      FileUtils.mkdir_p(options_dir) unless File.directory?(options_dir)
       File.new(file_path, 'w')
       retry
     end
