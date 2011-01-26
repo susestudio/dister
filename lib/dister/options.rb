@@ -23,6 +23,17 @@ module Dister
       @global.merge(@local)
     end
 
+    def method_missing(method, *args)
+      method_name = method.to_s
+      if (method_name =~ /=$/).nil?
+        # getter
+        provide[method_name]
+      else
+        # setter
+        store(method_name[0..-2], args.first)
+      end
+    end
+
     # Stores a specified option_key inside its originating options file.
     def store(option_key, option_value)
       if determine_options_file(option_key) == 'local'
