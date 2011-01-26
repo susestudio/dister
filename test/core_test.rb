@@ -14,19 +14,18 @@ class CoreTest < Test::Unit::TestCase
       should "not upload non-existing files" do
         STDERR.stubs(:puts)
         core = Dister::Core.new
-        assert !core.file_upload("foo", 123)
+        assert !core.file_upload("foo")
       end
 
       should "upload an existing files" do
         FileUtils.touch "foo"
-        options = {:appliance_id => 123,
-                   :permission => "0755"}
+        options = {:permission => "0755"}
         core = Dister::Core.new
         StudioApi::File.expects(:upload).\
                         with(is_a(File), options).\
                         once.\
                         returns(true)
-        assert core.file_upload("foo", 123, options)
+        assert core.file_upload("foo", options)
       end
     end
 
