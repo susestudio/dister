@@ -102,6 +102,28 @@ module Dister
       match
     end
 
+    # Uploads a file identified by filename to a SuSE Studio Appliance
+    # options is an hash. it can have the following keys:
+    # - filename (optional) - The name of the file in the filesystem.
+    # - path (optional) - The path where the file will be stored.
+    # - owner (optional) - The owner of the file.
+    # - group (optional) - The group of the file.
+    # - permissions (optional) - The permissions of the file.
+    # - enabled (optional) - Used to enable/disable this file for the builds.
+    # - url (optional) - The url of the file to add from the internet (HTTP and FTP are supported) when using the web upload method
+    # This method returns true if the file has been successfully uploaded
+    def file_upload filename, appliance_id, options={}
+      if File.exists? filename
+        options[:appliance_id] = appliance_id
+        File.open (filename) do |file|
+          StudioApi::File.upload file, options
+        end
+        true
+      else
+        STDERR.puts "Cannot upload #{filename}, it doesn't exist."
+        false
+      end
+    end
     private
 
     # Updates a user's credentials and stores them inside the global options file.
