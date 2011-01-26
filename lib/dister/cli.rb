@@ -21,26 +21,25 @@ module Dister
     method_option :arch,
       :type => :string, :default => 'i686', :required => false
     def create(appliance_name)
-      core = Core.new
-
+      access_core
       allowed_archs = %w(i686 x86_64)
       ensure_valid_option options[:arch], allowed_archs, "arch"
 
-      basesystems = core.basesystems
+      basesystems = @core.basesystems
       basesystem = options[:basesystem] || basesystems.find_all{|a| a =~ /\d+\.\d+/}.sort.last
       ensure_valid_option basesystem, basesystems, "base system"
 
       ensure_valid_option options[:template], VALID_TEMPLATES, "template"
 
-      core.create_appliance appliance_name, options[:template],
+      @core.create_appliance appliance_name, options[:template],
                             basesystem, options[:arch]
     end
 
     desc "build", "Build the appliance."
     def build
-      #TODO: make sure the appliance has been created
-      core = Core.new
-      if core.build
+      access_core
+      ensure_appliance_exists
+      if @core.build
         puts "Appliance successfully built."
       else
         puts "Something went wrong."
@@ -49,9 +48,9 @@ module Dister
 
     desc "download", "Download the appliance."
     def download
-      #TODO: make sure the appliance has been created
-      core = Core.new
-      builds = core.builds
+      access_core
+      ensure_appliance_exists
+      builds = @core.builds
       to_download = []
       if builds.size  == 0
         puts "There are no builds yet, se the build command."
@@ -125,30 +124,55 @@ module Dister
 
     desc "basesystems", "List all the base systems available on SUSE Studio."
     def basesystems
-      puts Core.new.basesystems.sort
+      access_core
+      puts @core.basesystems.sort
     end
 
     desc "bundle", "Bundles the application and all required gems."
     def bundle
-      core = Core.new
-      core.package_gems
-      core.package_app
+      access_core
+      @core.package_gems
+      @core.package_app
+    end
+
+    desc 'push', 'Pushes all required gems and the application tarball to SUSE Studio.'
+    def push
+      access_core
+      # Always call 'bundle' to ensure we got the latest version bundled.
+      invoke :bundle
+      ensure_appliance_exists
+      @core.upload_bundled_files
     end
 
     desc "package OPERATION PACKAGE_NAME", "Add/remove PACKAGE_NAME to the appliance"
     def package operation, package
+      access_core
       valid_operations = %w(add rm)
       ensure_valid_option operation, valid_operations, "operation"
-      core = Core.new
       case operation
       when "add"
-        core.add_package package
+        @core.add_package package
       when "rm"
-        core.rm_package package
+        @core.rm_package package
       end
     end
-    
+
     private
+
+    # Convenience method to reduce duplicity and improve readability.
+    # Sets @core
+    def access_core
+      @core ||= Core.new
+    end
+
+    # Checks whether an appliance already exists (invokes :create if not).
+    def ensure_appliance_exists
+      if @core.options.appliance_id.nil?
+        appliance_id = @core.shell.ask('Please provide a name for your appliance:')
+        invoke :create, [appliance_id]
+        @core.options.reload
+      end
+    end
 
     # Ensures actual_value is allowed. If not prints an error message to
     # stderr and exits

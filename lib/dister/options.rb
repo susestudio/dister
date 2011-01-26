@@ -6,46 +6,31 @@ module Dister
     GLOBAL_PATH = "#{File.expand_path('~')}/.dister"
     LOCAL_PATH = "#{Dister::Core::APP_ROOT}/.dister/options.yml"
 
-    # Read global and local option files.
+    # Read options from file.
     def initialize
+      reload
+    end
+
+    # Provides setter and getter for all options.
+    def method_missing(method, *args)
+      method_name = method.to_s
+      if (method_name =~ /=$/).nil?
+        # Getter
+        provide[method_name]
+      else
+        # Setter
+        store(method_name[0..-2], args.first)
+      end
+    end
+
+    # Read @global and @local option files.
+    def reload
       # Global options hold the user's credentials to access SUSE Studio.
       # They are stored inside the user's home directory.
       @global = read_options_from_file(GLOBAL_PATH)
       # Local options hold application specific data (e.g. appliance_id)
       # They are stored inside the application's root directory.
       @local = read_options_from_file(LOCAL_PATH)
-    end
-
-    # Returns a hash consisting of both global and local options.
-    # All options can be read through this method.
-    # NOTE: Local options override global options.
-    def provide
-      @global.merge(@local)
-    end
-
-    def method_missing(method, *args)
-      method_name = method.to_s
-      if (method_name =~ /=$/).nil?
-        # getter
-        provide[method_name]
-      else
-        # setter
-        store(method_name[0..-2], args.first)
-      end
-    end
-
-    # Stores a specified option_key inside its originating options file.
-    def store(option_key, option_value)
-      if determine_options_file(option_key) == 'local'
-        @local[option_key] = option_value
-        options_hash = @local
-        file_path = LOCAL_PATH
-      else
-        @global[option_key] = option_value
-        options_hash = @global
-        file_path = GLOBAL_PATH
-      end
-      write_options_to_file(options_hash, file_path)
     end
 
     private
@@ -85,6 +70,27 @@ module Dister
             'local'
           end
       end
+    end
+
+    # Stores a specified option_key inside its originating options file.
+    def store(option_key, option_value)
+      if determine_options_file(option_key) == 'local'
+        @local[option_key] = option_value
+        options_hash = @local
+        file_path = LOCAL_PATH
+      else
+        @global[option_key] = option_value
+        options_hash = @global
+        file_path = GLOBAL_PATH
+      end
+      write_options_to_file(options_hash, file_path)
+    end
+
+    # Returns a hash consisting of both global and local options.
+    # All options can be read through this method.
+    # NOTE: Local options override global options.
+    def provide
+      @global.merge(@local)
     end
 
   end

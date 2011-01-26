@@ -2,7 +2,7 @@ module Dister
 
   class Core
 
-    attr_reader :options
+    attr_reader :options, :shell
 
     API_PATH = 'https://susestudio.com/api/v1/user'
     APP_ROOT = File.expand_path('.')
@@ -110,11 +110,10 @@ module Dister
     # - enabled (optional) - Used to enable/disable this file for the builds.
     # - url (optional) - The url of the file to add from the internet (HTTP and FTP are supported) when using the web upload method
     # This method returns true if the file has been successfully uploaded
-    def file_upload filename, options={}
+    def file_upload filename, upload_options={}
       if File.exists? filename
-        options[:appliance_id] = @options.appliance_id
         File.open(filename) do |file|
-          StudioApi::File.upload file, options
+          StudioApi::File.upload file, @options.appliance_id, upload_options
         end
         true
       else
@@ -142,7 +141,23 @@ module Dister
       system "tar -czf #{package} . --exclude=.dister"
       puts "Done!"
     end
-    
+
+    # Uploads all gems and the app tarball to the appliance.
+    def upload_bundled_files
+      cache_dir = "#{APP_ROOT}/vendor/cache"
+      gem_files = (Dir.new(cache_dir).entries - ['.', '..']).collect do |file_name|
+        "#{cache_dir}/#{file_name}"
+      end
+      (gem_files + ["#{APP_ROOT}/.dister/application.tar.gz"]).each do |file_name|
+        if self.file_upload(file_name)
+          puts "Successfully uploaded '#{file_name}'."
+        else
+          STDERR.puts "Upload of '#{file_name}' failed. Exiting."
+          break
+        end
+      end
+    end
+
     def add_package package
     end
 

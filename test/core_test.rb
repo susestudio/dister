@@ -19,13 +19,12 @@ class CoreTest < Test::Unit::TestCase
 
       should "upload an existing files" do
         FileUtils.touch "foo"
-        options = {:permission => "0755"}
         core = Dister::Core.new
         StudioApi::File.expects(:upload).\
-                        with(is_a(File), options).\
+                        with(is_a(File), nil, {}).\
                         once.\
                         returns(true)
-        assert core.file_upload("foo", options)
+        assert core.file_upload("foo", {})
       end
     end
 
