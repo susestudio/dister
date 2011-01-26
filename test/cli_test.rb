@@ -72,6 +72,10 @@ class CliTest < Test::Unit::TestCase
 
       should "accept valid archs" do
         Dister::Core.any_instance.expects(:create_appliance).returns(true)
+        Dister::Core.any_instance.expects(:add_package)\
+                                 .with("devel_C_C++").once.returns(true)
+        Dister::Core.any_instance.expects(:add_package)\
+                                 .with("devel_ruby").once.returns(true)
         assert_nothing_raised do
           Dister::Cli.start(['create', 'foo','--arch', 'x86_64'])
         end
@@ -81,6 +85,10 @@ class CliTest < Test::Unit::TestCase
         Dister::Core.any_instance.expects(:create_appliance).\
                                  with("foo", "JeOS", "11.3", "i686").\
                                  returns(true)
+        Dister::Core.any_instance.expects(:add_package)\
+                                 .with("devel_C_C++").once.returns(true)
+        Dister::Core.any_instance.expects(:add_package)\
+                                 .with("devel_ruby").once.returns(true)
         assert_nothing_raised do
           Dister::Cli.start(['create', 'foo'])
         end
@@ -88,7 +96,6 @@ class CliTest < Test::Unit::TestCase
 
       should "detect bad combination of template and basesystem" do
         STDERR.stubs(:puts)
-        StudioApi::Appliance.stubs(:clone).returns(true)
         assert_raise(SystemExit) do
           Dister::Cli.start(['create', 'foo', "--template", "jeos",
                              "--basesystem", "SLES11_SP1_VMware"])

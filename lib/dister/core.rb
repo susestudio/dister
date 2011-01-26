@@ -159,9 +159,48 @@ module Dister
     end
 
     def add_package package
+      puts "Looking for #{package}"
+      appliance = StudioApi::Appliance.find @options.appliance_id 
+      result = appliance.search_software(package) #.find { |s| s.name == package }
+      #TODO: better handling
+      #Blocked by bnc#
+      if result.empty? #it is not found in available repos
+        puts "'#{package}' has not been found in the repositories currently "\
+             "added to your appliance."
+        keep_trying = @shell.ask('Would you like to search for this package '\
+                                'inside other repositories? (y/n)')
+        if keep_trying == 'y'
+          results = appliance.search_software(package, :all_repos => true)\
+                             .find_all { |s| s.name == package }
+          if results.empty?
+            puts "Cannot find #{package}, please look at this page: "
+            puts URI.encode "http://software.opensuse.org/search?p=1&baseproject=ALL&q=#{package}"
+          else
+            results.each do |r|
+              puts r.inspect
+            end
+          end
+        else
+          exit 0
+        end
+        # add repo which contain samba
+        #appliance.add_repository result.repository_id
+      end
+      appliance.add_package(package)
     end
 
     def rm_package package
+    end
+    
+    # Make sure the appliance doesn't have conflicts.
+    # In this case an error message is shown and the program halts.
+    def verify_status
+      appliance = StudioApi::Appliance.find @options.appliance_id 
+      if appliance.status.state != "ok"
+         STDERR.puts "appliance is not OK - #{appliance.status.issues.inspect}"
+         STDERR.puts "Visit #{appliance.edit_url} to manually fix the issue."
+         exit 1
+      end
     end
 
     private

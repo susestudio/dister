@@ -33,12 +33,19 @@ module Dister
 
       @core.create_appliance appliance_name, options[:template],
                             basesystem, options[:arch]
+
+      # add patterns required to build native gems
+      @core.add_package "devel_C_C++"
+      @core.add_package "devel_ruby"
+
+      # TODO: install bundler
     end
 
     desc "build", "Build the appliance."
     def build
       access_core
       ensure_appliance_exists
+      @core.verify_status
       if @core.build
         puts "Appliance successfully built."
       else
@@ -155,6 +162,8 @@ module Dister
       when "rm"
         @core.rm_package package
       end
+      @core.verify_status
+      puts "Done."
     end
 
     private
