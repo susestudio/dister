@@ -121,7 +121,7 @@ module Dister
         end
         true
       else
-        STDERR.puts "Cannot upload #{filename}, it doesn't exist."
+        STDERR.puts "Cannot upload #{filename}, it doesn't exists."
         false
       end
     end
@@ -144,6 +144,12 @@ module Dister
       system "rm #{package}" if File.exists?(package)
       system "tar -czf #{package} . --exclude=.dister"
       puts "Done!"
+    end
+    
+    def add_package appliance_id, package
+    end
+
+    def rm_package appliance_id, package
     end
 
     private

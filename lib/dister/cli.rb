@@ -95,29 +95,26 @@ module Dister
       end
     end
 
-    desc "format OPERATION FORMAT", "Enable building of FORMAT."
-    def format(operation,format)
-      valid_operations = %w(add rm)
-      ensure_valid_option operation, valid_operations, "format"
-      case format
+    desc "format OPERATION FORMAT", "Enables building of FORMAT"
+    method_option :all, :type => :boolean, :default => false,
+                        :required => false
+    def format(operation,format=nil)
+      valid_operations = %w(add rm list)
+      ensure_valid_option operation, valid_operations, "operation"
+      case operation
       when "add"
         ensure_valid_option format, VALID_FOMATS, "format"
         #TODO: local options store format
       when "rm"
         #TODO: local options: remove format
-      end
-    end
-
-    desc "formats", "List all available formats."
-    method_option :all,
-      :type => :boolean, :default => false, :required => false
-    def formats
-      if options[:all]
-        VALID_FOMATS.each do |f|
-          puts "  #{f}"
+      when "list"
+        if options[:all]
+          VALID_FOMATS.each do |f|
+            puts "  #{f}"
+          end
+        else
+          #TODO: local options: show enabled formats
         end
-      else
-        #TODO: local options: show enabled formats
       end
     end
 
@@ -138,6 +135,19 @@ module Dister
       core.package_app
     end
 
+    desc "package OPERATION PACKAGE_NAME", "Add/remove PACKAGE_NAME to the appliance"
+    def package operation, package
+      valid_operations = %w(add rm)
+      ensure_valid_option operation, valid_operations, "operation"
+      core = Core.new
+      case operation
+      when "add"
+        core.add_package appliance_id, package
+      when "rm"
+        core.rm_package appliance_id, package
+      end
+    end
+    
     private
 
     # Ensures actual_value is allowed. If not prints an error message to
