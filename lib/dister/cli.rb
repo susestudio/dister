@@ -40,7 +40,7 @@ module Dister
     def build
       #TODO: make sure the appliance has been created
       core = Core.new
-      if (core.build core.options['appliance_id'])
+      if core.build
         puts "Appliance successfully built."
       else
         puts "Something went wrong."
@@ -51,7 +51,7 @@ module Dister
     def download
       #TODO: make sure the appliance has been created
       core = Core.new
-      builds = core.builds core.options['appliance_id']
+      builds = core.builds
       to_download = []
       if builds.size  == 0
         puts "There are no builds yet, se the build command."
@@ -142,9 +142,9 @@ module Dister
       core = Core.new
       case operation
       when "add"
-        core.add_package appliance_id, package
+        core.add_package package
       when "rm"
-        core.rm_package appliance_id, package
+        core.rm_package package
       end
     end
     

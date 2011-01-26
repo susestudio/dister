@@ -2,18 +2,19 @@ module Dister
 
   class Core
 
+    attr_reader :options
+
     API_PATH = 'https://susestudio.com/api/v1/user'
     APP_ROOT = File.expand_path('.')
 
     # Connect to SUSE Studio and verify the user's credentials.
     # Sets @dister_options, @shell and @connection for further use.
     def initialize
-      @dister_options ||= Options.new
-      options_hash = @dister_options.provide
+      @options ||= Options.new
       @shell = Thor::Shell::Basic.new
       @connection = StudioApi::Connection.new(
-        options_hash['username'],
-        options_hash['api_key'],
+        @options.username,
+        @options.api_key,
         API_PATH
       )
       # Try the connection once to determine whether credentials are correct.
@@ -33,11 +34,6 @@ module Dister
       end
     end
 
-    # Gets currently set options.
-    def options
-      @dister_options.provide
-    end
-
     # Creates a new appliance.
     # Returns the new appliance.
     def create_appliance(name, template, basesystem, arch)
@@ -50,14 +46,14 @@ module Dister
         )
         puts "SUSE Studio appliance successfull created:"
         puts "  #{app.edit_url}"
-        @dister_options.store('appliance_id', app.id)
+        @options.appliance_id = app.id
       end
     end
 
-    def build appliance_id
+    def build
       #TODO: build using another format
       build = StudioApi::RunningBuild.create(
-        :appliance_id => appliance_id,
+        :appliance_id => @options.appliance_id,
         :image_type => "oem"
       )
       pbar = ProgressBar.new "Building", 100
@@ -73,8 +69,9 @@ module Dister
       true
     end
 
-    def builds appliance_id
-      StudioApi::Build.find(:all, :params => {:appliance_id => appliance_id})
+    def builds
+      StudioApi::Build.find(:all,
+                            :params => {:appliance_id => @options.appliance_id})
     end
 
     def templates
@@ -113,9 +110,9 @@ module Dister
     # - enabled (optional) - Used to enable/disable this file for the builds.
     # - url (optional) - The url of the file to add from the internet (HTTP and FTP are supported) when using the web upload method
     # This method returns true if the file has been successfully uploaded
-    def file_upload filename, appliance_id, options={}
+    def file_upload filename, options={}
       if File.exists? filename
-        options[:appliance_id] = appliance_id
+        options[:appliance_id] = @options.appliance_id
         File.open(filename) do |file|
           StudioApi::File.upload file, options
         end
@@ -146,10 +143,10 @@ module Dister
       puts "Done!"
     end
     
-    def add_package appliance_id, package
+    def add_package package
     end
 
-    def rm_package appliance_id, package
+    def rm_package package
     end
 
     private
@@ -157,8 +154,8 @@ module Dister
     # Updates a user's credentials and stores them inside the global options file.
     def update_credentials
       puts 'Please enter your SUSE Studio credentials (https://susestudio.com/user/show_api_key).'
-      @dister_options.store('username', @shell.ask("Username:\t"))
-      @dister_options.store('api_key', @shell.ask("API key:\t"))
+      @options.username = @shell.ask("Username:\t")
+      @options.api_key = @shell.ask("API key:\t")
     end
 
   end
