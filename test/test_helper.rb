@@ -1,11 +1,9 @@
-require 'rubygems'
-require 'fakefs/safe'
+require File.expand_path('../../lib/dister',__FILE__)
+require 'test/unit'
 require 'mocha'
 require 'shoulda'
 require 'stringio'
-require 'test/unit'
-require 'yaml'
-require File.expand_path('../../lib/dister',__FILE__)
+require 'fakefs/safe'
 
 class Object
   def capture(stream)

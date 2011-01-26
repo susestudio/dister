@@ -3,6 +3,7 @@ module Dister
   class Core
 
     API_PATH = 'https://susestudio.com/api/v1/user'
+    APP_ROOT = File.expand_path('.')
 
     # Connect to SUSE Studio and verify the user's credentials.
     # Sets @dister_options, @shell and @connection for further use.
@@ -124,6 +125,13 @@ module Dister
         false
       end
     end
+
+    # Use bundler to download and package all required gems for the app.
+    def package_gems
+      puts 'Packaging gems...'
+      system "#{APP_ROOT}/bundle package"
+    end
+
     private
 
     # Updates a user's credentials and stores them inside the global options file.

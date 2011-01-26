@@ -15,7 +15,9 @@ if !defined? FakeTemplates
 end
 
 class CliTest < Test::Unit::TestCase
+
   context "Run with FakeFS" do
+
     setup do
       FakeFS.activate!
     end
@@ -94,5 +96,16 @@ class CliTest < Test::Unit::TestCase
       end
 
     end
+
+    context "When executing 'dister bundle' it" do
+
+      should 'package all required gems' do
+        Dister::Core.any_instance.expects(:package_gems).once
+        Dister::Cli.start ['bundle']
+      end
+
+    end
+
   end
+
 end

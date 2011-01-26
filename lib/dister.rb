@@ -3,6 +3,7 @@ require 'thor'
 require 'studio_api'
 require 'yaml'
 require 'progressbar'
+require 'bundler'
 
 require File.expand_path('../dister/cli', __FILE__)
 require File.expand_path('../dister/core', __FILE__)

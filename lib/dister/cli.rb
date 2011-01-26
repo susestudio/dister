@@ -13,7 +13,7 @@ module Dister
       File.expand_path('../../',__FILE__)
     end
 
-    desc "create APPLIANCE_NAME", "create a new appliance named APPLIANCE_NAME"
+    desc "create APPLIANCE_NAME", "create a new appliance named APPLIANCE_NAME."
     method_option :basesystem,
       :type => :string, :default => nil, :required => false
     method_option :template,
@@ -36,7 +36,7 @@ module Dister
                             basesystem, options[:arch]
     end
 
-    desc "build", "Builds the appliance"
+    desc "build", "Build the appliance."
     def build
       #TODO: make sure the appliance has been created
       core = Core.new
@@ -47,7 +47,7 @@ module Dister
       end
     end
 
-    desc "download", "Download your appliance."
+    desc "download", "Download the appliance."
     def download
       #TODO: make sure the appliance has been created
       core = Core.new
@@ -95,7 +95,7 @@ module Dister
       end
     end
 
-    desc "format OPERATION FORMAT", "Enables building of FORMAT"
+    desc "format OPERATION FORMAT", "Enable building of FORMAT."
     def format(operation,format)
       valid_operations = %w(add rm)
       ensure_valid_option operation, valid_operations, "format"
@@ -108,7 +108,7 @@ module Dister
       end
     end
 
-    desc "formats", "List all the available formats"
+    desc "formats", "List all available formats."
     method_option :all,
       :type => :boolean, :default => false, :required => false
     def formats
@@ -121,14 +121,19 @@ module Dister
       end
     end
 
-    desc "templates", "List all the templates available on SUSE Studio"
+    desc "templates", "List all the templates available on SUSE Studio."
     def templates
       puts VALID_TEMPLATES.sort
     end
 
-    desc "basesystems", "List all the base systems available on SUSE Studio"
+    desc "basesystems", "List all the base systems available on SUSE Studio."
     def basesystems
       puts Core.new.basesystems.sort
+    end
+
+    desc "bundle", "Fetch all required gems (using bundler)."
+    def bundle
+      Core.new.package_gems
     end
 
     private
@@ -142,6 +147,7 @@ module Dister
         exit 1
       end
     end
+
   end
 
 end

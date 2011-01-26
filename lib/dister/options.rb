@@ -4,7 +4,7 @@ module Dister
   class Options
 
     GLOBAL_PATH = "#{File.expand_path('~')}/.dister"
-    LOCAL_PATH = "#{File.expand_path('.')}/.dister/options.yml"
+    LOCAL_PATH = "#{Dister::Core::APP_ROOT}/.dister/options.yml"
 
     # Read global and local option files.
     def initialize
