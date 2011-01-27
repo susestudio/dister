@@ -24,8 +24,6 @@ module Dister
         STDERR.puts "You cannot use the --global and --local switches at the same time"
         exit 1
       end
-
-      dister_options = nil
       if options[:local]
         # use only local options
         dister_options = Dister::Options.new(true)
@@ -33,7 +31,6 @@ module Dister
         # use also global options
         dister_options = Dister::Options.new(false)
       end
-
       dister_options.send("#{option}=", value)
     end
 
