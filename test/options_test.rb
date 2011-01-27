@@ -40,6 +40,17 @@ class OptionsTest < Test::Unit::TestCase
       assert File.exists? Dister::Options::LOCAL_PATH
     end
 
+    should "provide a default global value for api_key" do
+      FileUtils.rm_rf Dister::Options::GLOBAL_PATH
+      FileUtils.rm_rf Dister::Options::LOCAL_PATH
+
+      options = Dister::Options.new
+
+      assert File.exists? Dister::Options::GLOBAL_PATH
+      assert File.exists? Dister::Options::LOCAL_PATH
+      assert_equal(Dister::Options::SUSE_STUDIO_DOT_COM_API_PATH,
+                  options.api_path)
+    end
   end
 
   context 'For existing options it' do

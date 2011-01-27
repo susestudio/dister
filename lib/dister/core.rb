@@ -4,7 +4,6 @@ module Dister
 
     attr_reader :options, :shell
 
-    API_PATH = 'https://susestudio.com/api/v1/user'
     APP_ROOT = File.expand_path('.')
 
     # Connect to SUSE Studio and verify the user's credentials.
@@ -15,7 +14,7 @@ module Dister
       @connection = StudioApi::Connection.new(
         @options.username,
         @options.api_key,
-        API_PATH
+        @options.api_path
       )
       # Try the connection once to determine whether credentials are correct.
       @connection.api_version

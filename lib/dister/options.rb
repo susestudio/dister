@@ -3,6 +3,7 @@ require 'fileutils'
 module Dister
   class Options
 
+    SUSE_STUDIO_DOT_COM_API_PATH = 'https://susestudio.com/api/v1/user'
     GLOBAL_PATH = "#{File.expand_path('~')}/.dister"
     LOCAL_PATH = "#{Dister::Core::APP_ROOT}/.dister/options.yml"
 
@@ -28,6 +29,11 @@ module Dister
       # Global options hold the user's credentials to access SUSE Studio.
       # They are stored inside the user's home directory.
       @global = read_options_from_file(GLOBAL_PATH)
+
+      # make sure the default api path is available
+      unless @global.has_key? 'api_path'
+        @global['api_path'] = SUSE_STUDIO_DOT_COM_API_PATH
+      end
       # Local options hold application specific data (e.g. appliance_id)
       # They are stored inside the application's root directory.
       @local = read_options_from_file(LOCAL_PATH)
@@ -62,7 +68,7 @@ module Dister
         when @local.keys.include?(option_key) : 'local'
         when @global.keys.include?(option_key) : 'global'
         else
-          if ['username', 'api_key'].include?(option_key)
+          if %w(username api_key api_path).include?(option_key)
             # Credentials are stored globally per default.
             'global'
           else
