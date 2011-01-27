@@ -53,6 +53,36 @@ class CliTest < Test::Unit::TestCase
 
     end
 
+    context "config handling" do
+      setup do
+        FakeFS.activate!
+      end
+
+      teardown do
+        FakeFS.deactivate!
+      end
+
+      should "write to local file" do
+        FileUtils.rm_rf Dister::Options::GLOBAL_PATH
+        FileUtils.rm_rf Dister::Options::LOCAL_PATH
+        @out = capture(:stdout) do
+         Dister::Cli.start(['config', 'foo', 'foo_value', '--local'])
+        end
+        assert !File.exists?(Dister::Options::GLOBAL_PATH)
+        assert File.exists?(Dister::Options::LOCAL_PATH)
+        options = Dister::Options.new(true)
+        assert_equal "foo_value", options.foo
+      end
+
+      should "refuse to handle --local and --global at the same time" do
+        STDERR.stubs(:puts)
+        assert_raises SystemExit do
+         Dister::Cli.start(['config', 'foo', 'foo_value', '--local',
+                            '--global'])
+        end
+      end
+    end
+
     context "creating a new appliance" do
 
       setup do

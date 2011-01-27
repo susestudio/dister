@@ -14,6 +14,29 @@ module Dister
       File.expand_path('../../',__FILE__)
     end
 
+    desc "config OPTION VALUE", "set OPTION value to VALUE"
+    method_option :global,
+      :type => :boolean, :default => false, :required => false
+    method_option :local,
+      :type => :boolean, :default => false, :required => false
+    def config option, value
+      if options[:global] && options[:local]
+        STDERR.puts "You cannot use the --global and --local switches at the same time"
+        exit 1
+      end
+
+      dister_options = nil
+      if options[:local]
+        # use only local options
+        dister_options = Dister::Options.new(true)
+      else
+        # use also global options
+        dister_options = Dister::Options.new(false)
+      end
+
+      dister_options.send("#{option}=", value)
+    end
+
     desc "create APPLIANCE_NAME", "create a new appliance named APPLIANCE_NAME."
     method_option :basesystem, :type => :string, :default => nil, :required => false
     method_option :template, :type => :string, :default => 'JeOS', :required => false
