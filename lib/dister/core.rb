@@ -156,15 +156,22 @@ module Dister
 
     # Uploads all gems and the app tarball to the appliance.
     def upload_bundled_files
-      upload_options = {
-        :path => "/srv/www/#{APP_ROOT.split(/(\/|\\)/).last}/upload",
-        :owner => 'root',
-        :group => 'root'
-      }
+      # Collect data.
       cache_dir = "#{APP_ROOT}/vendor/cache"
       gem_files = (Dir.new(cache_dir).entries - ['.', '..']).collect do |file_name|
         "#{cache_dir}/#{file_name}"
       end
+      remote_path = "/srv/www/#{APP_ROOT.split(/(\/|\\)/).last}/upload"
+      upload_options = {
+        :path => remote_path,
+        :owner => 'root',
+        :group => 'root'
+      }
+      # Delete obsolete files.
+      StudioApi::File.find(:all, :params => {
+        :appliance_id => self.options.appliance_id
+      }).select{|file| file.path == remote_path}.each(&:destroy)
+      # Upload new files.
       (gem_files + ["#{APP_ROOT}/.dister/application.tar.gz"]).each do |file_name|
         if self.file_upload(file_name, upload_options)
           puts "Successfully uploaded '#{file_name}'."
