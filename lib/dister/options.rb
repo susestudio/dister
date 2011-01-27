@@ -50,17 +50,15 @@ module Dister
 
     # Reads from global or local options file and returns an options hash.
     def read_options_from_file(file_path)
-      begin
-        values_hash = YAML.load_file(file_path)
-        # In the unlikely case that the options file is empty, return an empty hash.
-        values_hash ? values_hash : {}
-      rescue Errno::ENOENT
-        # File does not exist.
-        options_dir = File.dirname(file_path)
-        FileUtils.mkdir_p(options_dir) unless File.directory?(options_dir)
-        File.new(file_path, 'w')
-        retry
-      end
+      values_hash = YAML.load_file(file_path)
+      # In the unlikely case that the options file is empty, return an empty hash.
+      values_hash ? values_hash : {}
+    rescue Errno::ENOENT
+      # File does not exist.
+      options_dir = File.dirname(file_path)
+      FileUtils.mkdir_p(options_dir) unless File.directory?(options_dir)
+      File.new(file_path, 'w')
+      retry
     end
 
     # Writes an options_hash back to a specified options file.
@@ -73,7 +71,7 @@ module Dister
     # Determines to which file an option gets written.
     def determine_options_file(option_key)
       return 'local' if @use_only_local
-      
+
       # Search in local options first, since they override global options.
       case option_key
         when @local.keys.include?(option_key) : 'local'
