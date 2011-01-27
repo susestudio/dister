@@ -72,6 +72,16 @@ module Dister
       true
     end
 
+    # Returns an app's appliance (or nil if none exist).
+    def appliance
+      appliance_id = self.options.appliance_id
+      return nil if appliance_id.nil?
+      StudioApi::Appliance.find(appliance_id.to_i)
+    rescue ActiveResource::BadRequest
+      self.options.appliance = nil
+      nil
+    end
+
     def builds
       StudioApi::Build.find(:all, :params => {:appliance_id => @options.appliance_id})
     end

@@ -148,7 +148,7 @@ module Dister
 
     # Checks whether an appliance already exists (invokes :create if not).
     def ensure_appliance_exists
-      if @core.options.appliance_id.nil?
+      if @core.appliance.nil?
         appliance_id = @core.shell.ask('Please provide a name for your appliance:')
         invoke :create, [appliance_id]
         @core.options.reload
