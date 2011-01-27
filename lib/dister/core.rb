@@ -48,9 +48,13 @@ module Dister
         puts "  #{app.edit_url}"
         @options.appliance_id = app.id
       end
+      self.add_package "devel_C_C++"
+      self.add_package "devel_ruby"
+      # TODO: Install bundler!
     end
 
     def build
+      verify_status
       #TODO: build using another format
       build = StudioApi::RunningBuild.create(
         :appliance_id => @options.appliance_id,
@@ -70,8 +74,7 @@ module Dister
     end
 
     def builds
-      StudioApi::Build.find(:all,
-                            :params => {:appliance_id => @options.appliance_id})
+      StudioApi::Build.find(:all, :params => {:appliance_id => @options.appliance_id})
     end
 
     def templates
@@ -160,7 +163,7 @@ module Dister
 
     def add_package package
       puts "Looking for #{package}"
-      appliance = StudioApi::Appliance.find @options.appliance_id 
+      appliance = StudioApi::Appliance.find @options.appliance_id
       result = appliance.search_software(package) #.find { |s| s.name == package }
       #TODO: better handling
       #Blocked by bnc#
@@ -191,15 +194,56 @@ module Dister
 
     def rm_package package
     end
-    
+
     # Make sure the appliance doesn't have conflicts.
     # In this case an error message is shown and the program halts.
     def verify_status
-      appliance = StudioApi::Appliance.find @options.appliance_id 
+      appliance = StudioApi::Appliance.find @options.appliance_id
       if appliance.status.state != "ok"
          STDERR.puts "appliance is not OK - #{appliance.status.issues.inspect}"
          STDERR.puts "Visit #{appliance.edit_url} to manually fix the issue."
          exit 1
+      end
+    end
+
+
+    def download(build_set)
+      # Choose the build(s) to download.
+      to_download = []
+      if build_set.size == 1
+        to_download << build_set.first
+      else
+        build_set.each_with_index do |build, index|
+          puts "#{index+1}) #{build.to_s}"
+        end
+        puts "#{build_set.size+1}) All of them."
+        puts "#{build_set.size+2}) None."
+        begin
+          choice = @shell.ask "Which appliance do you want to download? [1-#{build_set.size+1}]"
+        end while (choice.to_i > (build_set.size+2))
+        if choice.to_i == (build_set.size+2)
+          # none selected
+          exit 0
+        elsif choice.to_i == (build_set.size+1)
+          # all selected
+          to_download = build_set
+        else
+          to_download << build_set[choice.to_i-1]
+        end
+      end
+      # Download selected builds.
+      to_download.each do |b|
+        puts "Going to download #{b.to_s}"
+        d = Downloader.new(b.download_url.sub("https:", "http:"), "Downloading", b.compressed_image_size.to_i)
+        begin
+          d.start
+        rescue
+          STDOUT.puts
+          STDERR.puts
+          STDERR.flush
+          STDERR.puts $!
+          exit 1
+        end
       end
     end
 

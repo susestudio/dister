@@ -1,6 +1,3 @@
-require 'curb'
-require 'progressbar'
-
 module Dister
   class Downloader
     def initialize url, message, size
@@ -11,17 +8,18 @@ module Dister
 
     def start
       curl = Curl::Easy.new(@url)
-
       curl.on_complete do |c|
         @pbar.finish
-      end 
+      end
       curl.on_progress do |dl_total, dl_now, ul_total, ul_now|
         @pbar.set dl_now
       end
       curl.on_failure do |c, code|
-        @pbar.finish
-        STDOUT.flush
-        raise "Download failed with error code: #{code}"
+        unless code == 'Curl::Err::CurlOKNo error'
+          @pbar.finish
+          STDOUT.flush
+          raise "Download failed with error code: #{code}"
+        end
       end
       curl.perform
     end

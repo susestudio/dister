@@ -4,6 +4,7 @@ module Dister
 
     VALID_TEMPLATES = %w(JeOS Server X Gnome KDE)
     VALID_FOMATS = %w(oem vmx iso xen) #TODO: add other formats
+    VALID_ARCHS = %w(i686 x86_64)
 
     include Thor::Actions
 
@@ -14,42 +15,29 @@ module Dister
     end
 
     desc "create APPLIANCE_NAME", "create a new appliance named APPLIANCE_NAME."
-    method_option :basesystem,
-      :type => :string, :default => nil, :required => false
-    method_option :template,
-      :type => :string, :default => 'JeOS', :required => false
-    method_option :arch,
-      :type => :string, :default => 'i686', :required => false
+    method_option :basesystem, :type => :string, :default => nil, :required => false
+    method_option :template, :type => :string, :default => 'JeOS', :required => false
+    method_option :arch, :type => :string, :default => 'i686', :required => false
     def create(appliance_name)
+      # Check parameters.
       access_core
-      allowed_archs = %w(i686 x86_64)
-      ensure_valid_option options[:arch], allowed_archs, "arch"
-
+      ensure_valid_option options[:arch], VALID_ARCHS, "arch"
+      ensure_valid_option options[:template], VALID_TEMPLATES, "template"
       basesystems = @core.basesystems
       basesystem = options[:basesystem] || basesystems.find_all{|a| a =~ /\d+\.\d+/}.sort.last
       ensure_valid_option basesystem, basesystems, "base system"
-
-      ensure_valid_option options[:template], VALID_TEMPLATES, "template"
-
-      @core.create_appliance appliance_name, options[:template],
-                            basesystem, options[:arch]
-
-      # add patterns required to build native gems
-      @core.add_package "devel_C_C++"
-      @core.add_package "devel_ruby"
-
-      # TODO: install bundler
+      # Create appliance and add patterns required to build native gems.
+      @core.create_appliance(appliance_name, options[:template], basesystem, options[:arch])
     end
 
     desc "build", "Build the appliance."
     def build
       access_core
       ensure_appliance_exists
-      @core.verify_status
       if @core.build
         puts "Appliance successfully built."
       else
-        puts "Something went wrong."
+        puts "Build failed."
       end
     end
 
@@ -57,70 +45,31 @@ module Dister
     def download
       access_core
       ensure_appliance_exists
-      builds = @core.builds
-      to_download = []
-      if builds.size  == 0
-        puts "There are no builds yet, se the build command."
-      elsif builds.size == 1
-        to_download << builds.first
-      else
-        builds.each_with_index do |build, index|
-          puts "#{index+1}) #{build.to_s}"
-        end
-        puts "#{builds.size+1}) All of them."
-        puts "#{builds.size+2}) None."
-
-        begin
-          puts "Which appliance do you want to download? [1-#{builds.size+1}]"
-          choice = STDIN.gets.chomp
-        end while (choice.to_i > (builds.size+2))
-
-        if choice.to_i == (builds.size+2)
-          # none selected
-          exit 0
-        elsif choice.to_i == (builds.size+1)
-          # all selected
-          to_download = builds
-        else
-          to_download << builds[choice.to_i-1]
-        end
-
-        to_download.each do |b|
-          puts "Going to download #{b.to_s}"
-          d = Downloader.new(b.download_url.sub("https:", "http:"), "Downloading", b.compressed_image_size.to_i)
-          begin
-            d.start
-          rescue
-            STDOUT.puts
-            STDERR.puts
-            STDERR.flush
-            STDERR.puts $!
-            exit 1
-          end
-        end
-      end
+      ensure_build_exists
+      @core.download(@builds)
     end
 
     desc "format OPERATION FORMAT", "Enables building of FORMAT"
-    method_option :all, :type => :boolean, :default => false,
-                        :required => false
-    def format(operation,format=nil)
-      valid_operations = %w(add rm list)
-      ensure_valid_option operation, valid_operations, "operation"
-      case operation
-      when "add"
-        ensure_valid_option format, VALID_FOMATS, "format"
-        #TODO: local options store format
-      when "rm"
-        #TODO: local options: remove format
-      when "list"
-        if options[:all]
-          VALID_FOMATS.each do |f|
-            puts "  #{f}"
+    method_option :all, :type => :boolean, :default => false, :required => false
+    def format(operation,format = nil)
+      access_core
+      ensure_valid_option operation, %w(add rm list), "operation"
+      if operation == 'list' and options[:all]
+        puts "Available formats:"
+        puts VALID_FOMATS
+      else
+        existing_types = @core.options.build_types || []
+        chosen_types = case operation
+          when "add"
+            ensure_valid_option format, VALID_FOMATS, "format"
+            @core.options.build_types = (existing_types + [format]).uniq
+          when "rm"
+            @core.options.build_types = (existing_types - [format])
+          else
+            existing_types
           end
-        else
-          #TODO: local options: show enabled formats
-        end
+        puts "Chosen formats:"
+        puts chosen_types
       end
     end
 
@@ -179,6 +128,16 @@ module Dister
       if @core.options.appliance_id.nil?
         appliance_id = @core.shell.ask('Please provide a name for your appliance:')
         invoke :create, [appliance_id]
+        @core.options.reload
+      end
+    end
+
+    # Checks whether there is at least one existing build (invokes :build if not).
+    def ensure_build_exists
+      @builds = @core.builds
+      if @builds.empty?
+        invoke :build
+        @builds = @core.builds
         @core.options.reload
       end
     end
