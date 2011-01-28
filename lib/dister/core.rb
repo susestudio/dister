@@ -188,19 +188,11 @@ module Dister
     # Creates all relevant config files (e.g. apache.conf) for the appliance.
     def package_config_files
       app_name = @options.app_name
-      config_content = "<VirtualHost *:80>
-    PassengerEnabled on
-    RailsEnv production
-    ServerAdmin you@example.com
-    DocumentRoot /srv/www/#{app_name}/public
-    <Directory /srv/www/#{app_name}/public>
-        Options FollowSymlinks
-        Allow from all
-    </Directory>
-    ErrorLog /var/log/apache2/error.log
-    LogLevel warn
-    CustomLog /var/log/apache2/access.log combined
-</VirtualHost>"
+      
+      filename = File.expand_path('../../templates/passenger.erb', __FILE__)
+      erb = ERB.new(File.read(filename))
+      config_content = erb.result(binding)
+
       config_path = "#{APP_ROOT}/.dister/#{app_name}_apache.conf"
       FileUtils.rm(config_path, :force => true)
       File.open(config_path, 'w') do |config_file|
