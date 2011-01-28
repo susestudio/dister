@@ -56,7 +56,7 @@ class CoreTest < Test::Unit::TestCase
       setup do
         @core = Dister::Core.new
         @core.stubs(:puts)
-        @core.stubs(:print)
+        Dister::Utils.stubs(:print)
       end
 
       should "raise an error if something is wrong" do
