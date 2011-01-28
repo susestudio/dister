@@ -145,9 +145,17 @@ module Dister
     # This method returns true if the file has been successfully uploaded
     def file_upload filename, upload_options={}
       if File.exists? filename
+        # Delete existing (obsolete) file.
+        StudioApi::File.find(:all, :params => {
+          :appliance_id => self.options.appliance_id
+        }).select { |file|
+          file.path == (upload_options[:path] || '/') and file.filename == File.basename(filename)
+        }.each(&:destroy)
+        # Upload new file.
         File.open(filename) do |file|
           StudioApi::File.upload file, @options.appliance_id, upload_options
         end
+        puts "Successfully uploaded '#{filename}'."
         true
       else
         STDERR.puts "Cannot upload #{filename}, it doesn't exists."
@@ -175,32 +183,50 @@ module Dister
       puts "Done!"
     end
 
-    # Uploads all gems and the app tarball to the appliance.
+    # Creates all relevant config files (e.g. apache.conf) for the appliance.
+    def package_config_files
+      app_name = APP_ROOT.split(/(\/|\\)/).last
+      config_content = "<VirtualHost *:80>
+    PassengerEnabled on
+    RailsEnv production
+    ServerAdmin you@example.com
+    DocumentRoot /srv/www/#{app_name}/public
+    <Directory /srv/www/#{app_name}/public>
+        Options FollowSymlinks
+        Allow from all
+    </Directory>
+    ErrorLog /var/log/apache2/error.log
+    LogLevel warn
+    CustomLog /var/log/apache2/access.log combined
+</VirtualHost>"
+      config_path = "#{APP_ROOT}/.dister/#{app_name}_apache.conf"
+      FileUtils.rm(config_path, :force => true)
+      File.open(config_path, 'w') do |config_file|
+        config_file.write(config_content)
+      end
+    end
+
+    # Uploads all gems, config_files and the app tarball to the appliance.
     def upload_bundled_files
       # Collect data.
       cache_dir = "#{APP_ROOT}/vendor/cache"
       gem_files = (Dir.new(cache_dir).entries - ['.', '..']).collect do |file_name|
         "#{cache_dir}/#{file_name}"
       end
-      remote_path = "/srv/www/#{APP_ROOT.split(/(\/|\\)/).last}/upload"
+      app_name = APP_ROOT.split(/(\/|\\)/).last
+      remote_path = "/srv/www/#{app_name}/upload"
       upload_options = {
         :path => remote_path,
         :owner => 'root',
         :group => 'root'
       }
-      # Delete obsolete files.
-      StudioApi::File.find(:all, :params => {
-        :appliance_id => self.options.appliance_id
-      }).select{|file| file.path == remote_path}.each(&:destroy)
       # Upload new files.
       (gem_files + ["#{APP_ROOT}/.dister/application.tar.gz"]).each do |file_name|
-        if self.file_upload(file_name, upload_options)
-          puts "Successfully uploaded '#{file_name}'."
-        else
-          STDERR.puts "Upload of '#{file_name}' failed. Exiting."
-          break
-        end
+        self.file_upload(file_name, upload_options)
       end
+      # Upload config files to separate location.
+      upload_options[:path] = "/etc/apache2/vhosts.d"
+      self.file_upload("#{APP_ROOT}/.dister/#{app_name}_apache.conf", upload_options)
     end
 
     def add_package package

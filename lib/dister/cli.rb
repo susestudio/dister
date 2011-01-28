@@ -15,22 +15,10 @@ module Dister
     end
 
     desc "config OPTION VALUE", "set OPTION value to VALUE"
-    method_option :global,
-      :type => :boolean, :default => false, :required => false
     method_option :local,
       :type => :boolean, :default => false, :required => false
     def config option, value
-      if options[:global] && options[:local]
-        STDERR.puts "You cannot use the --global and --local switches at the same time"
-        exit 1
-      end
-      if options[:local]
-        # use only local options
-        dister_options = Dister::Options.new(true)
-      else
-        # use also global options
-        dister_options = Dister::Options.new(false)
-      end
+      dister_options = Dister::Options.new(options[:local].nil?)
       dister_options.send("#{option}=", value)
     end
 
@@ -112,6 +100,7 @@ module Dister
       access_core
       @core.package_gems
       @core.package_app
+      @core.package_config_files
     end
 
     desc 'push', 'Pushes all required gems and the application tarball to SUSE Studio.'
