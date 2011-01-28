@@ -51,7 +51,7 @@ module Dister
       self.add_package "devel_C_C++"
       self.add_package "devel_ruby"
       self.add_package 'rubygem-bundler'
-      self.add_package 'rubygem-passenger'
+      self.add_package 'rubygem-passenger-apache2'
 
       Utils::execute_printing_progress "Uploading build scripts" do
         upload_configurations_scripts
