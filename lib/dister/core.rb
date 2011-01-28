@@ -1,3 +1,5 @@
+require 'erb'
+
 module Dister
 
   class Core
@@ -50,6 +52,11 @@ module Dister
       self.add_package "devel_ruby"
       self.add_package 'rubygem-bundler'
       self.add_package 'rubygem-passenger'
+
+      execute_printing_progress "Uploading build scripts" do
+        upload_configurations_scripts
+      end
+
       app
     end
 
@@ -250,6 +257,29 @@ module Dister
       #TODO
     end
 
+    # Uploads our configuration scripts 
+    def upload_configurations_scripts
+      #TODO: where is going to be placed our rails app?
+      rails_root = "TODO"
+
+      filename = File.expand_path('../../templates/boot_script.erb', __FILE__)
+      erb = ERB.new(File.read(filename))
+      boot_script = erb.result(binding)
+
+      filename = File.expand_path('../../templates/build_script.erb', __FILE__)
+      erb = ERB.new(File.read(filename))
+      build_script = erb.result(binding)
+
+      conf = appliance.configuration
+      conf.scripts.boot.script = boot_script
+      conf.scripts.boot.enabled = true
+      
+      conf.scripts.build.script = build_script
+      conf.scripts.build.enabled = true
+      conf.save
+      true
+    end
+
     # Asks Studio to mirror a repository.
     # Returns a StudioApi::Repository object
     def import_repository url, name
@@ -306,7 +336,6 @@ module Dister
         end
       end
     end
-
 
     def download(build_set)
       # Choose the build(s) to download.
