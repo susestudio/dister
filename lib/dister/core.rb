@@ -68,9 +68,29 @@ module Dister
         :appliance_id => @options.appliance_id,
         :image_type => "oem"
       )
-      pbar = ProgressBar.new "Building", 100
 
       build.reload
+      if build.state == "queued"
+        puts "Your build is queued. It will be automatically processed by "\
+             "SUSE Studio. You can keep waiting or you can exit from dister."
+        puts "Exiting from dister won't remove your build from the queue."
+        shell = Thor::Shell::Basic.new
+        keep_waiting = @shell.ask('Do you want to keep waiting (y/n)')
+        if keep_waiting == 'n'
+          exit 0
+        end
+
+        Utils::execute_printing_progress "Build queued..." do
+          while build.state == 'queued' do
+            sleep 5
+            build.reload
+          end
+        end
+      end
+
+      # build is no longer queued
+      pbar = ProgressBar.new "Building", 100
+
       while not ['finished', 'error', 'failed', 'cancelled'].include?(build.state)
         pbar.set build.percent.to_i
         sleep 5
