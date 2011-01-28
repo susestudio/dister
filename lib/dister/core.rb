@@ -40,7 +40,7 @@ module Dister
     def create_appliance(name, template, basesystem, arch)
       match = check_template_and_basesystem_availability(template, basesystem)
       exit 1 if match.nil?
-      
+
       app = Utils::execute_printing_progress "Cloning appliance" do
         StudioApi::Appliance.clone(
           match.appliance_id, {:name => name, :arch => arch}
@@ -276,7 +276,7 @@ module Dister
     # Uploads our configuration scripts
     def upload_configurations_scripts
       #TODO: where is going to be placed our rails app?
-      rails_root = "TODO"
+      rails_root = "/srv/www/#{@options.app_name}"
 
       filename = File.expand_path('../../templates/boot_script.erb', __FILE__)
       erb = ERB.new(File.read(filename))
@@ -329,7 +329,7 @@ module Dister
         STDERR.puts "#{appliance.basesystem}: unknown base system"
         exit 1
       end
-      
+
       Utils::execute_printing_progress "Adding #{name} repository" do
         repos = StudioApi::Repository.find(:all, :params => {:filter => url.downcase})
         if repos.size > 0
