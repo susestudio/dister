@@ -7,7 +7,7 @@ module Dister
     APP_ROOT = File.expand_path('.')
 
     # Connect to SUSE Studio and verify the user's credentials.
-    # Sets @dister_options, @shell and @connection for further use.
+    # Sets @options, @shell and @connection for further use.
     def initialize
       @options ||= Options.new
       @shell = Thor::Shell::Basic.new
@@ -43,13 +43,14 @@ module Dister
         app = StudioApi::Appliance.clone(
           match.appliance_id, {:name => name, :arch => arch}
         )
-        puts "SUSE Studio appliance successfull created:"
-        puts "  #{app.edit_url}"
         @options.appliance_id = app.id
       end
+      ensure_devel_languages_ruby_extensions_repo_is_added
       self.add_package "devel_C_C++"
       self.add_package "devel_ruby"
-      # TODO: Install bundler!
+      self.add_package 'rubygem-bundler'
+      self.add_package 'rubygem-passenger'
+      app
     end
 
     def build
@@ -87,7 +88,14 @@ module Dister
     end
 
     def templates
-      StudioApi::TemplateSet.find(:first, :conditions => {:name => "default"}).template
+      reply = StudioApi::TemplateSet.find(:first, :conditions => {:name => "default"})
+      if reply.nil?
+        STDERR.puts "There is no default template set named 'default'"
+        STDERR.puts "Please contact SUSE Studio admin"
+        exit 1
+      else
+        return reply.template
+      end
     end
 
     def basesystems
@@ -183,8 +191,8 @@ module Dister
     end
 
     def add_package package
-      puts "Looking for #{package}"
       appliance = StudioApi::Appliance.find @options.appliance_id
+      appliance_basesystem = appliance.basesystem
       result = appliance.search_software(package) #.find { |s| s.name == package }
       #TODO: better handling
       #Blocked by bnc#
@@ -194,15 +202,33 @@ module Dister
         keep_trying = @shell.ask('Would you like to search for this package '\
                                 'inside other repositories? (y/n)')
         if keep_trying == 'y'
-          results = appliance.search_software(package, :all_repos => true)\
+          matches = appliance.search_software(package, :all_repos => true)\
                              .find_all { |s| s.name == package }
-          if results.empty?
+          repositories = matches.map do |r|
+            StudioApi::Repository.find r.repository_id
+          end.find_all{|r| r.base_system == appliance_basesystem}
+
+          if repositories.empty?
             puts "Cannot find #{package}, please look at this page: "
-            puts URI.encode "http://software.opensuse.org/search?p=1&baseproject=ALL&q=#{package}"
+            puts URI.encode "http://software.opensuse.org/search?p=1&"\
+                            "baseproject=ALL&q=#{package}"
           else
-            results.each do |r|
-              puts r.inspect
+            puts "Package #{package} can be installed from one of the "\
+                 "following repositories:"
+            repositories.each_with_index do |repo, index|
+              puts "#{index+1} - #{repo.name} (#{repo.base_url})"
             end
+            puts "#{repositories.size+1} - None of them."
+            begin
+              choice = @shell.ask("Which repo do you want to use? "\
+                                  "[1-#{repositories.size+1}]")
+            end while (choice.to_i > (repositories.size+1))
+            if (choice.to_i == (repositories.size+1))
+              abort("Package not added.")
+            else
+              repo_id = repositories[choice.to_i-1].id
+            end
+            appliance.add_repository repo_id
           end
         else
           exit 0
@@ -210,10 +236,56 @@ module Dister
         # add repo which contain samba
         #appliance.add_repository result.repository_id
       end
+      puts "Adding #{package} package."
       appliance.add_package(package)
     end
 
     def rm_package package
+    end
+
+    # Asks Studio to mirror a repository.
+    # Returns a StudioApi::Repository object
+    def import_repository url, name
+      StudioApi::Repository.import url, name
+    end
+
+    def ensure_devel_languages_ruby_extensions_repo_is_added
+      appliance = StudioApi::Appliance.find @options.appliance_id
+      name = "devel:language:ruby:extensions"
+      url = "http://download.opensuse.org/repositories/devel:/languages:/ruby:/extensions/"
+
+      case appliance.basesystem
+      when "11.1"
+        url += "openSUSE_11.1"
+        name += " 11.1"
+      when "11.2"
+        url += "openSUSE_11.2"
+        name += " 11.2"
+      when "11.3"
+        url += "openSUSE_11.3"
+        name += " 11.3"
+      when "SLED10_SP2", "SLED10_SP3", "SLES10_SP2", "SLES10_SP3"
+        url += "SLE_10/"
+        name += " SLE10"
+      when "SLED11", "SLES11"
+        url += "SLE_11"
+        name += " SLE 11"
+      when "SLED11_SP1", "SLES11_SP1", "SLES11_SP1_VMware"
+        url += "SLE_11_SP1"
+        name += " SLE11 SP1"
+      else
+        STDERR.puts "#{appliance.basesystem}: unknown base system"
+        exit 1
+      end
+
+      repos = StudioApi::Repository.find(:all, :params => {:filter => url.downcase})
+      if repos.size > 0
+        repo = repos.first
+      else
+        repo = import_repository url, name
+      end
+      puts "Adding #{name} repository."
+      appliance.add_repository repo.id
     end
 
     # Make sure the appliance doesn't have conflicts.

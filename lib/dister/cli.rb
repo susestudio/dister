@@ -47,7 +47,10 @@ module Dister
       basesystem = options[:basesystem] || basesystems.find_all{|a| a =~ /\d+\.\d+/}.sort.last
       ensure_valid_option basesystem, basesystems, "base system"
       # Create appliance and add patterns required to build native gems.
-      @core.create_appliance(appliance_name, options[:template], basesystem, options[:arch])
+      app = @core.create_appliance(appliance_name, options[:template],
+                                   basesystem, options[:arch])
+      puts "SUSE Studio appliance successfull created:"
+      puts "  #{app.edit_url}"
     end
 
     desc "build", "Build the appliance."
