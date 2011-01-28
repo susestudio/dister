@@ -40,8 +40,8 @@ module Dister
     def create_appliance(name, template, basesystem, arch)
       match = check_template_and_basesystem_availability(template, basesystem)
       exit 1 if match.nil?
-
-      app = execute_printing_progress "Cloning appliance" do
+      
+      app = Utils::execute_printing_progress "Cloning appliance" do
         StudioApi::Appliance.clone(
           match.appliance_id, {:name => name, :arch => arch}
         )
@@ -53,7 +53,7 @@ module Dister
       self.add_package 'rubygem-bundler'
       self.add_package 'rubygem-passenger'
 
-      execute_printing_progress "Uploading build scripts" do
+      Utils::execute_printing_progress "Uploading build scripts" do
         upload_configurations_scripts
       end
       puts "SUSE Studio appliance successfull created:"
@@ -264,7 +264,7 @@ module Dister
         # add repo which contain samba
         #appliance.add_repository result.repository_id
       end
-      execute_printing_progress "Adding #{package} package" do
+      Utils::execute_printing_progress "Adding #{package} package" do
         appliance.add_package(package)
       end
     end
@@ -329,8 +329,8 @@ module Dister
         STDERR.puts "#{appliance.basesystem}: unknown base system"
         exit 1
       end
-
-      execute_printing_progress "Adding #{name} repository" do
+      
+      Utils::execute_printing_progress "Adding #{name} repository" do
         repos = StudioApi::Repository.find(:all, :params => {:filter => url.downcase})
         if repos.size > 0
           repo = repos.first
@@ -344,7 +344,7 @@ module Dister
     # Make sure the appliance doesn't have conflicts.
     # In this case an error message is shown and the program halts.
     def verify_status
-      execute_printing_progress "Verifying appliance status" do
+      Utils::execute_printing_progress "Verifying appliance status" do
         if appliance.status.state != "ok"
            message = "Appliance is not OK - #{appliance.status.issues.inspect}"
            message += "\nVisit #{appliance.edit_url} to manually fix the issue."
@@ -400,32 +400,6 @@ module Dister
       puts 'Please enter your SUSE Studio credentials (https://susestudio.com/user/show_api_key).'
       @options.username = @shell.ask("Username:\t")
       @options.api_key = @shell.ask("API key:\t")
-    end
-
-    # Shows message and prints a dot per second until the block code
-    # terminates its execution.
-    # Exceptions raised by the block are displayed and program exists with
-    # error status 1.
-    def execute_printing_progress message
-      t = Thread.new do
-        print "#{message}"
-        while(true) do
-          print "."
-          STDOUT.flush
-          sleep 1
-        end
-      end
-      shell = Thor::Shell::Color.new
-      begin
-        ret = yield
-        t.kill if t.alive?
-        shell.say_status "[DONE]", "", :GREEN
-        return ret
-      rescue
-        t.kill if t.alive?
-        shell.say_status "[ERROR]", $!, :RED
-        exit 1
-      end
     end
   end
 end

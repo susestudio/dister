@@ -9,6 +9,7 @@ require 'curb'
 require File.expand_path('../dister/cli', __FILE__)
 require File.expand_path('../dister/core', __FILE__)
 require File.expand_path('../dister/options', __FILE__)
+require File.expand_path('../dister/utils', __FILE__)
 require File.expand_path('../dister/downloader', __FILE__)
 require File.expand_path('../studio_api/build', __FILE__)
 
