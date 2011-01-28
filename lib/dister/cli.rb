@@ -99,8 +99,9 @@ module Dister
     def bundle
       access_core
       @core.package_gems
-      @core.package_app
       @core.package_config_files
+      # Package app last, since it will tarball the application including all gems.
+      @core.package_app
     end
 
     desc 'push', 'Pushes all required gems and the application tarball to SUSE Studio.'

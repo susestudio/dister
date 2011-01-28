@@ -40,7 +40,7 @@ module Dister
     def create_appliance(name, template, basesystem, arch)
       match = check_template_and_basesystem_availability(template, basesystem)
       exit 1 if match.nil?
-      
+
       app = execute_printing_progress "Cloning appliance" do
         StudioApi::Appliance.clone(
           match.appliance_id, {:name => name, :arch => arch}
@@ -176,16 +176,17 @@ module Dister
     # Previously packaged versions get overwritten.
     def package_app
       puts 'Packaging application...'
-      system "cd #{APP_ROOT}"
-      package = "./.dister/application.tar.gz"
-      system "rm #{package}" if File.exists?(package)
-      system "tar -czf #{package} . --exclude=.dister"
+      # Save app_name for further use.
+      @options.app_name = app_name = APP_ROOT.split(/(\/|\\)/).last
+      package = ".dister/#{app_name}_application.tar.gz"
+      `rm #{package}` if File.exists?(package)
+      `tar -czf .dister/#{app_name}_application.tar.gz ../#{app_name}/ --exclude=.dister &> /dev/null`
       puts "Done!"
     end
 
     # Creates all relevant config files (e.g. apache.conf) for the appliance.
     def package_config_files
-      app_name = APP_ROOT.split(/(\/|\\)/).last
+      app_name = @options.app_name
       config_content = "<VirtualHost *:80>
     PassengerEnabled on
     RailsEnv production
@@ -206,24 +207,12 @@ module Dister
       end
     end
 
-    # Uploads all gems, config_files and the app tarball to the appliance.
+    # Uploads the app tarball and the config file to the appliance.
     def upload_bundled_files
-      # Collect data.
-      cache_dir = "#{APP_ROOT}/vendor/cache"
-      gem_files = (Dir.new(cache_dir).entries - ['.', '..']).collect do |file_name|
-        "#{cache_dir}/#{file_name}"
-      end
-      app_name = APP_ROOT.split(/(\/|\\)/).last
-      remote_path = "/srv/www/#{app_name}/upload"
-      upload_options = {
-        :path => remote_path,
-        :owner => 'root',
-        :group => 'root'
-      }
-      # Upload new files.
-      (gem_files + ["#{APP_ROOT}/.dister/application.tar.gz"]).each do |file_name|
-        self.file_upload(file_name, upload_options)
-      end
+      app_name = @options.app_name
+      upload_options = {:path => "/srv/www", :owner => 'root', :group => 'root'}
+      # Upload tarball.
+      self.file_upload("#{APP_ROOT}/.dister/#{app_name}_application.tar.gz", upload_options)
       # Upload config files to separate location.
       upload_options[:path] = "/etc/apache2/vhosts.d"
       self.file_upload("#{APP_ROOT}/.dister/#{app_name}_apache.conf", upload_options)
@@ -339,7 +328,7 @@ module Dister
         STDERR.puts "#{appliance.basesystem}: unknown base system"
         exit 1
       end
-      
+
       execute_printing_progress "Adding #{name} repository" do
         repos = StudioApi::Repository.find(:all, :params => {:filter => url.downcase})
         if repos.size > 0
@@ -412,7 +401,7 @@ module Dister
       @options.api_key = @shell.ask("API key:\t")
     end
 
-    # Shows message and prints a dot per second until the block code 
+    # Shows message and prints a dot per second until the block code
     # terminates its execution.
     # Exceptions raised by the block are displayed and program exists with
     # error status 1.
