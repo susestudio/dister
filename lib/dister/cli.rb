@@ -125,6 +125,25 @@ module Dister
       puts "Done."
     end
 
+    desc "info", "Show some useful information about the appliance"
+    def info
+      access_core
+      app = Utils::execute_printing_progress "Contacting SUSE Studio" do
+        @core.appliance
+      end
+      puts "Name: #{app.name}"
+      puts "Based on: #{app.parent.name}"
+      if app.builds.empty?
+        puts "No builds yet."
+      else
+        puts "Builds:"
+        app.builds.each do |b|
+          puts "  - #{b.image_type}, version #{b.version}"
+        end
+      end
+      puts "Edit url: #{app.edit_url}"
+    end
+
     private
 
     # Convenience method to reduce duplicity and improve readability.
