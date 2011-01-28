@@ -14,10 +14,10 @@
 
 if [ -f /etc/init.d/suse_studio_firstboot ]
 then
-  
   # Put commands to be run on the first boot of your appliance here
   echo "Running SUSE Studio first boot script..."
   echo "Loading database schema"
   cd <%= rails_root %>
   RAILS_ENV = production rake db:schema:load
+  bundle install --local
 fi

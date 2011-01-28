@@ -188,7 +188,7 @@ module Dister
     # Creates all relevant config files (e.g. apache.conf) for the appliance.
     def package_config_files
       app_name = @options.app_name
-      
+
       filename = File.expand_path('../../templates/passenger.erb', __FILE__)
       erb = ERB.new(File.read(filename))
       config_content = erb.result(binding)
@@ -267,7 +267,6 @@ module Dister
 
     # Uploads our configuration scripts
     def upload_configurations_scripts
-      #TODO: where is going to be placed our rails app?
       rails_root = "/srv/www/#{@options.app_name}"
 
       filename = File.expand_path('../../templates/boot_script.erb', __FILE__)
