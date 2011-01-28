@@ -3,7 +3,7 @@ require 'fileutils'
 module Dister
   class Options
 
-    SUSE_STUDIO_DOT_COM_API_PATH = 'https://susestudio.com/api/v1/user'
+    SUSE_STUDIO_DOT_COM_API_PATH = 'https://susestudio.com/api/v2/user'
     GLOBAL_PATH = "#{File.expand_path('~')}/.dister"
     LOCAL_PATH = "#{Dister::Core::APP_ROOT}/.dister/options.yml"
 
