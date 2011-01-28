@@ -71,14 +71,13 @@ module Dister
       pbar = ProgressBar.new "Building", 100
 
       build.reload
-      while build.state != "finished"
+      while not ['finished', 'error', 'failed', 'cancelled'].include?(build.state)
         pbar.set build.percent.to_i
         sleep 5
         build.reload
       end
       pbar.finish
-      #TODO: what happens if there's a build error?
-      true
+      build.state == 'finished'
     end
 
     # Returns an app's appliance (or nil if none exist).
