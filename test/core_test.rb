@@ -20,6 +20,8 @@ class CoreTest < Test::Unit::TestCase
       should "upload an existing files" do
         FileUtils.touch "foo"
         core = Dister::Core.new
+        core.stubs(:puts)
+        StudioApi::File.expects(:find).once.returns([])
         StudioApi::File.expects(:upload).\
                         with(is_a(File), nil, {}).\
                         once.\
@@ -43,10 +45,9 @@ class CoreTest < Test::Unit::TestCase
       end
 
       should "create a tarball of the application's source files" do
-        @core.expects(:system).with("cd #{Dister::Core::APP_ROOT}").once.returns(true)
-        File.expects(:exists?).once.returns(true)
-        @core.expects(:system).with("rm ./.dister/application.tar.gz").once.returns(true)
-        @core.expects(:system).with("tar -czf ./.dister/application.tar.gz . --exclude=.dister").once.returns(true)
+        File.stubs(:exists?).returns(true)
+        @core.expects(:system).with("rm .dister/dister_application.tar.gz").once.returns(true)
+        @core.expects(:system).with("tar -czf .dister/dister_application.tar.gz ../dister/ --exclude=.dister &> /dev/null").once.returns(true)
         @core.package_app
       end
     end
@@ -55,6 +56,7 @@ class CoreTest < Test::Unit::TestCase
       setup do
         @core = Dister::Core.new
         @core.stubs(:puts)
+        @core.stubs(:print)
       end
 
       should "raise an error if something is wrong" do

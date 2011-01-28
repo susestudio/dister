@@ -56,7 +56,8 @@ module Dister
       execute_printing_progress "Uploading build scripts" do
         upload_configurations_scripts
       end
-
+      puts "SUSE Studio appliance successfull created:"
+      puts "  #{app.edit_url}"
       app
     end
 
@@ -179,8 +180,8 @@ module Dister
       # Save app_name for further use.
       @options.app_name = app_name = APP_ROOT.split(/(\/|\\)/).last
       package = ".dister/#{app_name}_application.tar.gz"
-      `rm #{package}` if File.exists?(package)
-      `tar -czf .dister/#{app_name}_application.tar.gz ../#{app_name}/ --exclude=.dister &> /dev/null`
+      system "rm #{package}" if File.exists?(package)
+      system "tar -czf .dister/#{app_name}_application.tar.gz ../#{app_name}/ --exclude=.dister &> /dev/null"
       puts "Done!"
     end
 
@@ -272,7 +273,7 @@ module Dister
       #TODO
     end
 
-    # Uploads our configuration scripts 
+    # Uploads our configuration scripts
     def upload_configurations_scripts
       #TODO: where is going to be placed our rails app?
       rails_root = "TODO"
@@ -288,7 +289,7 @@ module Dister
       conf = appliance.configuration
       conf.scripts.boot.script = boot_script
       conf.scripts.boot.enabled = true
-      
+
       conf.scripts.build.script = build_script
       conf.scripts.build.enabled = true
       conf.save

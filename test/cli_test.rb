@@ -66,7 +66,7 @@ class CliTest < Test::Unit::TestCase
         FileUtils.rm_rf Dister::Options::GLOBAL_PATH
         FileUtils.rm_rf Dister::Options::LOCAL_PATH
         @out = capture(:stdout) do
-         Dister::Cli.start(['config', 'foo', 'foo_value', '--local'])
+          Dister::Cli.start(['config', 'foo', 'foo_value', '--local'])
         end
         assert !File.exists?(Dister::Options::GLOBAL_PATH)
         assert File.exists?(Dister::Options::LOCAL_PATH)
@@ -74,18 +74,12 @@ class CliTest < Test::Unit::TestCase
         assert_equal "foo_value", options.foo
       end
 
-      should "refuse to handle --local and --global at the same time" do
-        STDERR.stubs(:puts)
-        assert_raises SystemExit do
-         Dister::Cli.start(['config', 'foo', 'foo_value', '--local',
-                            '--global'])
-        end
-      end
     end
 
     context "creating a new appliance" do
 
       setup do
+        Dister::Core.any_instance.stubs(:puts)
         Dister::Core.any_instance.stubs(:templates).returns(FakeTemplates)
         basesystems = ["11.1", "SLED10_SP2", "SLES10_SP2", "SLED11", "SLES11",
                        "11.2", "SLES11_SP1", "SLED11_SP1", "11.3", "SLED10_SP3",
@@ -133,7 +127,9 @@ class CliTest < Test::Unit::TestCase
     context "When executing 'dister bundle' it" do
 
       should 'package all required gems' do
+        FileUtils.stubs(:rm).returns(:true)
         Dister::Core.any_instance.expects(:package_gems).once
+        Dister::Core.any_instance.expects(:package_config_files).once
         Dister::Core.any_instance.expects(:package_app).once
         Dister::Cli.start ['bundle']
       end

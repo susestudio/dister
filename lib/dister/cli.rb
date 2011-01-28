@@ -18,7 +18,7 @@ module Dister
     method_option :local,
       :type => :boolean, :default => false, :required => false
     def config option, value
-      dister_options = Dister::Options.new(options[:local].nil?)
+      dister_options = Dister::Options.new(!options[:local].nil?)
       dister_options.send("#{option}=", value)
     end
 
@@ -35,10 +35,7 @@ module Dister
       basesystem = options[:basesystem] || basesystems.find_all{|a| a =~ /\d+\.\d+/}.sort.last
       ensure_valid_option basesystem, basesystems, "base system"
       # Create appliance and add patterns required to build native gems.
-      app = @core.create_appliance(appliance_name, options[:template],
-                                   basesystem, options[:arch])
-      puts "SUSE Studio appliance successfull created:"
-      puts "  #{app.edit_url}"
+      @core.create_appliance(appliance_name, options[:template], basesystem, options[:arch])
     end
 
     desc "build", "Build the appliance."
