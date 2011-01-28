@@ -2,8 +2,8 @@
     PassengerEnabled on
     RailsEnv production
     ServerAdmin you@example.com
-    DocumentRoot /srv/www/<%= app_name %>/public
-    <Directory /srv/www/<%= app_name %>/public>
+    DocumentRoot /srv/www/<%= @options.app_name %>/public
+    <Directory /srv/www/<%= @options.app_name %>/public>
         Options FollowSymlinks
         Allow from all
     </Directory>

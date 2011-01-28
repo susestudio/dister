@@ -21,6 +21,12 @@ module Dister
       # Try the connection once to determine whether credentials are correct.
       @connection.api_version
       StudioApi::Util.configure_studio_connection @connection
+
+      # Ensure app_name is stored for further use.
+      if @options.app_name.nil?
+        @options.app_name = APP_ROOT.split(/(\/|\\)/).last
+      end
+
       true
     rescue ActiveResource::UnauthorizedAccess
       puts 'A connection to SUSE Studio could not be established.'
@@ -196,23 +202,19 @@ module Dister
     # Previously packaged versions get overwritten.
     def package_app
       puts 'Packaging application...'
-      # Save app_name for further use.
-      @options.app_name = app_name = APP_ROOT.split(/(\/|\\)/).last
-      package = ".dister/#{app_name}_application.tar.gz"
+      package = ".dister/#{@options.app_name}_application.tar.gz"
       system "rm #{package}" if File.exists?(package)
-      system "tar -czf .dister/#{app_name}_application.tar.gz ../#{app_name}/ --exclude=.dister &> /dev/null"
+      system "tar -czf .dister/#{@options.app_name}_application.tar.gz ../#{@options.app_name}/ --exclude=.dister &> /dev/null"
       puts "Done!"
     end
 
     # Creates all relevant config files (e.g. apache.conf) for the appliance.
     def package_config_files
-      app_name = @options.app_name
-
       filename = File.expand_path('../../templates/passenger.erb', __FILE__)
       erb = ERB.new(File.read(filename))
       config_content = erb.result(binding)
 
-      config_path = "#{APP_ROOT}/.dister/#{app_name}_apache.conf"
+      config_path = "#{APP_ROOT}/.dister/#{@options.app_name}_apache.conf"
       FileUtils.rm(config_path, :force => true)
       File.open(config_path, 'w') do |config_file|
         config_file.write(config_content)
@@ -221,13 +223,12 @@ module Dister
 
     # Uploads the app tarball and the config file to the appliance.
     def upload_bundled_files
-      app_name = @options.app_name
       upload_options = {:path => "/srv/www", :owner => 'root', :group => 'root'}
       # Upload tarball.
-      self.file_upload("#{APP_ROOT}/.dister/#{app_name}_application.tar.gz", upload_options)
+      self.file_upload("#{APP_ROOT}/.dister/#{@options.app_name}_application.tar.gz", upload_options)
       # Upload config files to separate location.
       upload_options[:path] = "/etc/apache2/vhosts.d"
-      self.file_upload("#{APP_ROOT}/.dister/#{app_name}_apache.conf", upload_options)
+      self.file_upload("#{APP_ROOT}/.dister/#{@options.app_name}_apache.conf", upload_options)
     end
 
     def add_package package
