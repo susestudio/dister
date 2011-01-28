@@ -101,16 +101,20 @@ class CliTest < Test::Unit::TestCase
       end
 
       should "accept valid archs" do
-        Dister::Core.any_instance.expects(:create_appliance).returns(true)
+        fake_app = mock()
+        fake_app.stubs(:edit_url).returns("http://susestudio.com")
+        Dister::Core.any_instance.expects(:create_appliance).returns(fake_app)
         assert_nothing_raised do
           Dister::Cli.start(['create', 'foo','--arch', 'x86_64'])
         end
       end
 
       should "guess latest version of openSUSE if no base system is specified" do
+        fake_app = mock()
+        fake_app.stubs(:edit_url).returns("http://susestudio.com")
         Dister::Core.any_instance.expects(:create_appliance).\
                                  with("foo", "JeOS", "11.3", "i686").\
-                                 returns(true)
+                                 returns(fake_app)
         assert_nothing_raised do
           Dister::Cli.start(['create', 'foo'])
         end

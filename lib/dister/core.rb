@@ -37,14 +37,14 @@ module Dister
     # Returns the new appliance.
     def create_appliance(name, template, basesystem, arch)
       match = check_template_and_basesystem_availability(template, basesystem)
-      if match.nil?
-        exit 1
-      else
-        app = StudioApi::Appliance.clone(
+      exit 1 if match.nil?
+      
+      app = execute_printing_progress "Cloning appliance" do
+        StudioApi::Appliance.clone(
           match.appliance_id, {:name => name, :arch => arch}
         )
-        @options.appliance_id = app.id
       end
+      @options.appliance_id = app.id
       ensure_devel_languages_ruby_extensions_repo_is_added
       self.add_package "devel_C_C++"
       self.add_package "devel_ruby"
@@ -75,12 +75,18 @@ module Dister
 
     # Returns an app's appliance (or nil if none exist).
     def appliance
-      appliance_id = self.options.appliance_id
-      return nil if appliance_id.nil?
-      StudioApi::Appliance.find(appliance_id.to_i)
-    rescue ActiveResource::BadRequest
-      self.options.appliance = nil
-      nil
+      if @appliance.nil?
+        begin
+          appliance_id = self.options.appliance_id
+          return nil if appliance_id.nil?
+          @appliance = StudioApi::Appliance.find(appliance_id.to_i)
+        rescue ActiveResource::BadRequest
+          self.options.appliance_id = nil
+          nil
+        end
+      else
+        @appliance
+      end
     end
 
     def builds
@@ -191,9 +197,8 @@ module Dister
     end
 
     def add_package package
-      appliance = StudioApi::Appliance.find @options.appliance_id
       appliance_basesystem = appliance.basesystem
-      result = appliance.search_software(package) #.find { |s| s.name == package }
+      result = appliance.search_software(package)#.find{|s| s.name == package }
       #TODO: better handling
       #Blocked by bnc#
       if result.empty? #it is not found in available repos
@@ -236,11 +241,13 @@ module Dister
         # add repo which contain samba
         #appliance.add_repository result.repository_id
       end
-      puts "Adding #{package} package."
-      appliance.add_package(package)
+      execute_printing_progress "Adding #{package} package" do
+        appliance.add_package(package)
+      end
     end
 
     def rm_package package
+      #TODO
     end
 
     # Asks Studio to mirror a repository.
@@ -250,7 +257,6 @@ module Dister
     end
 
     def ensure_devel_languages_ruby_extensions_repo_is_added
-      appliance = StudioApi::Appliance.find @options.appliance_id
       name = "devel:language:ruby:extensions"
       url = "http://download.opensuse.org/repositories/devel:/languages:/ruby:/extensions/"
 
@@ -277,25 +283,27 @@ module Dister
         STDERR.puts "#{appliance.basesystem}: unknown base system"
         exit 1
       end
-
-      repos = StudioApi::Repository.find(:all, :params => {:filter => url.downcase})
-      if repos.size > 0
-        repo = repos.first
-      else
-        repo = import_repository url, name
+      
+      execute_printing_progress "Adding #{name} repository" do
+        repos = StudioApi::Repository.find(:all, :params => {:filter => url.downcase})
+        if repos.size > 0
+          repo = repos.first
+        else
+          repo = import_repository url, name
+        end
+        appliance.add_repository repo.id
       end
-      puts "Adding #{name} repository."
-      appliance.add_repository repo.id
     end
 
     # Make sure the appliance doesn't have conflicts.
     # In this case an error message is shown and the program halts.
     def verify_status
-      appliance = StudioApi::Appliance.find @options.appliance_id
-      if appliance.status.state != "ok"
-         STDERR.puts "appliance is not OK - #{appliance.status.issues.inspect}"
-         STDERR.puts "Visit #{appliance.edit_url} to manually fix the issue."
-         exit 1
+      execute_printing_progress "Verifying appliance status" do
+        if appliance.status.state != "ok"
+           message = "Appliance is not OK - #{appliance.status.issues.inspect}"
+           message += "\nVisit #{appliance.edit_url} to manually fix the issue."
+           raise message
+        end
       end
     end
 
@@ -349,6 +357,30 @@ module Dister
       @options.api_key = @shell.ask("API key:\t")
     end
 
+    # Shows message and prints a dot per second until the block code 
+    # terminates its execution.
+    # Exceptions raised by the block are displayed and program exists with
+    # error status 1.
+    def execute_printing_progress message
+      t = Thread.new do
+        print "#{message}"
+        while(true) do
+          print "."
+          STDOUT.flush
+          sleep 1
+        end
+      end
+      shell = Thor::Shell::Color.new
+      begin
+        ret = yield
+        t.kill if t.alive?
+        shell.say_status "[DONE]", "", :GREEN
+        return ret
+      rescue
+        t.kill if t.alive?
+        shell.say_status "[ERROR]", $!, :RED
+        exit 1
+      end
+    end
   end
-
 end

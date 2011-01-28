@@ -58,14 +58,14 @@ class CoreTest < Test::Unit::TestCase
       end
 
       should "raise an error if something is wrong" do
-        STDERR.stubs(:puts)
+        STDOUT.stubs(:puts)
         fake_status = mock()
         fake_status.stubs(:state).returns("BOOM")
         fake_status.stubs(:issues).returns("Bad mood")
         fake_appliance = mock()
         fake_appliance.stubs(:edit_url).returns("http://susestudio.com")
         fake_appliance.stubs(:status).returns(fake_status)
-        StudioApi::Appliance.stubs(:find).returns(fake_appliance)
+        @core.stubs(:appliance).returns(fake_appliance)
         assert_raise SystemExit do
           @core.verify_status
         end
