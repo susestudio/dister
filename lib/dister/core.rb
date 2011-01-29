@@ -178,10 +178,13 @@ module Dister
           file.path == (upload_options[:path] || '/') and file.filename == File.basename(filename)
         }.each(&:destroy)
         # Upload new file.
-        File.open(filename) do |file|
-          StudioApi::File.upload file, @options.appliance_id, upload_options
+        message =  "Uploading #{filename} "
+        message += "(#{Utils.readable_file_size(File.size(filename),2)})"
+        Utils::execute_printing_progress message do
+          File.open(filename) do |file|
+            StudioApi::File.upload file, @options.appliance_id, upload_options
+          end
         end
-        puts "Successfully uploaded '#{filename}'."
         true
       else
         STDERR.puts "Cannot upload #{filename}, it doesn't exists."
