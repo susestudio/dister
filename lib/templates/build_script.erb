@@ -13,7 +13,7 @@
 . /studio/profile
 
 # add passenger module to apache
-sed -i.bak 's/^(APACHE_MODULES=.*)"/* passenger"/' /etc/sysconfig/apache2
+sed -i.bak 's/^\(APACHE_MODULES=.*\)"/\1 passenger"/' /etc/sysconfig/apache2
 
 # enable services 
 insserv /etc/init.d/apache2
