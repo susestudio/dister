@@ -1,3 +1,82 @@
-Nothing to say yet.
+= Dister: an Heroku like solution for SUSE Studio
 
-Checkout https://features.opensuse.org/311133 for more details.
+{SUSE Studio}[http://susestudio.com] is an online Linux image creation tool.
+Creating an appliance to run your rails appliacation can be quite annoying:
+there are extra repositories to add, gem dependencies to satisfy, a database to 
+setup, apache and passenger to configure, overlay files to add and so on.
+
+You can save some time cloning {this}[http://susegallery.com/a/CZ0T0D/rails-in-a-box]
+appliance shared on {SUSE Gallery}[http://susegallery.com/], but some efforts
+are still required.
+
+Currenlty the easiest solution to deploy a rails application in the cloud is 
+{Heroku}[http://heroku.com/].
+
+Dister is a command line tool similar to the one used by Heroku. Within a few 
+steps you can create a SUSE Studio appliance running your rails application, 
+download it and run into your private or public cloud.
+
+SUSE Studio can currenlty supports the following appliance formats:
+- oem: it can be run inside KVM or it can be installed to a hard disk/usb pen.
+- iso and preload iso: you can create a live dvd or an installation dvd.:
+- vmx and ovf: use these formats if you want to run your appliance inside of
+  VMware, VirtualBox or KVM.
+- XEN guest: use this format if you want to run your appliance using Xen
+  hypervisor.
+- ec2: jumping into Amazon's cloud has never been so easy.
+
+More formats are coming. Checkout {SUSE Studio}[http://susestudio.com] for 
+more details.
+
+== Common workflow
+
+This section will show the common workflow required to create a SUSE Studio 
+appliance running a standard Rails application.
+
+All the following commands must be executed inside of the root directory of
+your rails application.
+
+=== Create
+You can create your SUSE Studio appliance using the following command:
+    dister create APPLIANCE_NAME
+The following code creates a 32bit appliance based on the latest version of
+openSUSE supported by SUSE Studio. The appliance will use the 
+{JeOS}[http://en.wikipedia.org/wiki/Just_enough_operating_system] template.
+
+You can change the default behaviour using the following command line options:
+- `--basesystem`: to use something different from openSUSE.
+- `--template`: to use something different from the JeOS template.
+- `--arch`: to build a 64bit appliance.
+
+By default all the appliances created by dister have the <em>devel:language:ruby:extensions</em>
+repository. This repository contains all the ruby-related packages.
+It's actively maintained by the openSUSE community and by some Novell employee.
+
+The following packages are automatically added to all appliances:
+- devel_C_C++ and devel_Ruby: these are needed in order to build native gems.
+- rubygem-bundler: this package provides latest version of bundler.
+- rubygem-passenger-apache2: this package is required in order to deploy your
+  rails application using Apache. All the Apache packages will be automatically
+  installed by SUSE Studio because they are dependencies of rubygem-passenger-apache2.
+
+The create task takes care of uploading some custom build and boot scripts.
+These scripts take care of initializing your appliance. You can inspect them
+using SUSE Studio web interface.
+
+=== Upload your code
+In order to add your rails application to your SUSE Studio appliance just execute:
+    dister push
+
+This will automatically create (or update) your local bundle and upload it to
+SUSE Studio.
+Your bundle contains:
+- all the gems needed by your rails appliance (this is done using bundler).
+- all your code
+- apache configuration
+
+=== Build
+Building can be triggered using the following command:
+    dister build
+A nice progress bar will be shown.
+
+TODO: write more documentation.
