@@ -44,9 +44,9 @@ openSUSE supported by SUSE Studio. The appliance will use the
 {JeOS}[http://en.wikipedia.org/wiki/Just_enough_operating_system] template.
 
 You can change the default behaviour using the following command line options:
-- `--basesystem`: to use something different from openSUSE.
-- `--template`: to use something different from the JeOS template.
-- `--arch`: to build a 64bit appliance.
+- <tt>--basesystem</tt>: to use something different from openSUSE.
+- <tt>--template</tt>: to use something different from the JeOS template.
+- <tt>--arch</tt>: to build a 64bit appliance.
 
 By default all the appliances created by dister have the <em>devel:language:ruby:extensions</em>
 repository. This repository contains all the ruby-related packages.
