@@ -1,0 +1,13 @@
+packages:
+  - mysql-community-server
+  - rubygem-mysql2
+daemon_name:      mysql
+cmdline_tool:     mysql
+create_user_cmd:  |
+                  CREATE USER '<%= @user %>'@'localhost'
+                  IDENTIFIED BY '<%= @password %>'; 
+                  GRANT ALL PRIVILEGES ON *.* TO '<%= @user %>'@'localhost' 
+                  WITH GRANT OPTION;
+restore_dump_cmd: |
+                  mysql --user=<%= @user %> --password=<%= @password %>
+                  <%= @dbname %> < <%= @dump %>
