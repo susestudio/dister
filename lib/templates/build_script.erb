@@ -17,6 +17,5 @@ sed -i.bak 's/^\(APACHE_MODULES=.*\)"/\1 passenger"/' /etc/sysconfig/apache2
 
 # enable services 
 insserv /etc/init.d/apache2
-#insserv database
+insserv /etc/init.d/<%= @db_adapter.daemon_name %>
 
-#TODO: run bundler

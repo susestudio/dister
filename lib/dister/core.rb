@@ -47,10 +47,10 @@ module Dister
       match = check_template_and_basesystem_availability(template, basesystem)
       exit 1 if match.nil?
 
+      @db_adapter = get_db_adapter
       app = Utils::execute_printing_progress "Cloning appliance" do
-        StudioApi::Appliance.clone(
-          match.appliance_id, {:name => name, :arch => arch}
-        )
+        StudioApi::Appliance.clone(match.appliance_id, {:name => name,
+                                                        :arch => arch})
       end
       @options.appliance_id = app.id
       ensure_devel_languages_ruby_extensions_repo_is_added
@@ -58,6 +58,9 @@ module Dister
       self.add_package "devel_ruby"
       self.add_package 'rubygem-bundler'
       self.add_package 'rubygem-passenger-apache2'
+      @db_adapter.packages.each do |p|
+        self.add_package p
+      end
 
       Utils::execute_printing_progress "Uploading build scripts" do
         upload_configurations_scripts
@@ -222,6 +225,13 @@ module Dister
       File.open(config_path, 'w') do |config_file|
         config_file.write(config_content)
       end
+      
+      @db_adapter = get_db_adapter
+      create_db_user_file = "#{APP_ROOT}/.dister/create_db_user.sql"
+      FileUtils.rm(create_db_user_file, :force => true)
+      File.open(create_db_user_file, 'w') do |file|
+        file.write(@db_adapter.create_user_cmd)
+      end
     end
 
     # Uploads the app tarball and the config file to the appliance.
@@ -232,6 +242,9 @@ module Dister
       # Upload config files to separate location.
       upload_options[:path] = "/etc/apache2/vhosts.d"
       self.file_upload("#{APP_ROOT}/.dister/#{@options.app_name}_apache.conf", upload_options)
+      # Upload db related files to separate location.
+      upload_options[:path] = "/root"
+      self.file_upload("#{APP_ROOT}/.dister/create_db_user.sql", upload_options)
     end
 
     def add_package package
@@ -285,7 +298,9 @@ module Dister
     end
 
     def rm_package package
-      #TODO
+      Utils::execute_printing_progress "Removing #{package} package" do
+        appliance.remove_package(package)
+      end
     end
 
     # Uploads our configuration scripts
@@ -414,6 +429,15 @@ module Dister
       puts 'Please enter your SUSE Studio credentials (https://susestudio.com/user/show_api_key).'
       @options.username = @shell.ask("Username:\t")
       @options.api_key = @shell.ask("API key:\t")
+    end
+
+    def get_db_adapter
+      db_config_file = "#{APP_ROOT}/config/database.yml"
+      if !File.exists?(db_config_file)
+        STDERR.puts "Cannot find #{db_config_file}."
+        exit 1
+      end
+      @db_adapter ||= Dister::DbAdapter.new db_config_file
     end
   end
 end

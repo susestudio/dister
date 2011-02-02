@@ -16,8 +16,22 @@ if [ -f /etc/init.d/suse_studio_firstboot ]
 then
   # Put commands to be run on the first boot of your appliance here
   echo "Running SUSE Studio first boot script..."
-  echo "Loading database schema"
   cd <%= rails_root %>
-  RAILS_ENV = production rake db:schema:load
   bundle install --local
+  
+  # create db user
+  if [ -f /root/create_db_user.sql ]
+  then
+    /etc/init.d/<%= @db_adapter.daemon_name %> start
+    <%= @db_adapter.cmdline_tool %> < /root/create_db_user.sql
+  fi
+
+<% if !@db_adapter.has_dump? %>
+  echo "Loading database schema"
+  RAILS_ENV=production rake db:create
+  RAILS_ENV=production rake db:schema:load
+<% else %>
+  <%= @db_adapter.restore_dump_cmd %>
+<% end %>
+
 fi
