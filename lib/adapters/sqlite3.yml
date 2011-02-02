@@ -1,0 +1,7 @@
+package_name:
+  - sqlite3
+  - rubygem-sqlite3
+cmdline_tool: sqlite3
+daemon_name:
+create_user_cmd:
+restore_dump_cmd: sqlite db/<%= dbname %>.sqlite3 < <%= dump %>

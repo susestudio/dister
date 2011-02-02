@@ -1,0 +1,12 @@
+packages:
+  - postgresql-server
+  - rubygem-pg
+daemon_name:      postgresql
+cmdline_tool:     psql
+create_user_cmd:  |
+                  CREATE USER '<%= @user %>'
+                  WITH PASSWORD '<%= @password %>'; 
+                  CREATEDB;
+restore_dump_cmd: |
+                  psql -U <%= @user %> -h localhost -p <%= @password %>
+                  <%= @dbname %> < <%= @dump %>

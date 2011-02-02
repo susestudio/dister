@@ -1,0 +1,17 @@
+defaults: &defaults
+  adapter: unsupported_adapter
+  host: 127.0.0.1
+  username: foo
+  password: secret
+
+development:
+  <<: *defaults
+  database: cool_rails_app_dev
+
+test: &test
+  <<: *defaults
+  database: cool_rails_app_test
+
+production:
+  <<: *defaults
+  database: cool_rails_app
