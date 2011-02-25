@@ -16,7 +16,7 @@ Dister is a command line tool similar to the one used by Heroku. Within a few
 steps you can create a SUSE Studio appliance running your rails application, 
 download it and run into your private or public cloud.
 
-SUSE Studio can currenlty supports the following appliance formats:
+SUSE Studio currenlty supports the following appliance formats:
 - oem: it can be run inside KVM or it can be installed to a hard disk/usb pen.
 - iso and preload iso: you can create a live dvd or an installation dvd.:
 - vmx and ovf: use these formats if you want to run your appliance inside of
