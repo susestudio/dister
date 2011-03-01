@@ -57,7 +57,7 @@ module Dister
       @core.download(@builds)
     end
 
-    desc "format OPERATION FORMAT", "Enables building of FORMAT"
+    desc "format list|add|rm FORMAT", "Enables building of FORMAT"
     method_option :all, :type => :boolean, :default => false, :required => false
     def format(operation,format = nil)
       access_core
