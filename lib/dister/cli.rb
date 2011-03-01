@@ -110,16 +110,20 @@ module Dister
       @core.upload_bundled_files
     end
 
-    desc "package OPERATION PACKAGE_NAME", "Add/remove PACKAGE_NAME to the appliance"
-    def package operation, package
+    desc "package add|rm PACKAGE [PACKAGE, ...]", "Add/remove PACKAGE to the appliance"
+    def package operation, *package
       access_core
       valid_operations = %w(add rm)
       ensure_valid_option operation, valid_operations, "operation"
       case operation
       when "add"
-        @core.add_package package
+        package.each do |p|
+          @core.add_package p
+        end
       when "rm"
-        @core.rm_package package
+        package.each do |p|
+          @core.rm_package p
+        end
       end
       @core.verify_status
       puts "Done."
