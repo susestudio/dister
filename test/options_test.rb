@@ -5,8 +5,8 @@ class OptionsTest < Test::Unit::TestCase
   # Small helper method to use FakeFS for storing options.
   def save_options(options_map, options_type)
     options_path = case options_type
-      when :local : Dister::Options::LOCAL_PATH
-      when :global : Dister::Options::GLOBAL_PATH
+      when :local then Dister::Options::LOCAL_PATH
+      when :global then Dister::Options::GLOBAL_PATH
       else
         raise "Invalid options type '#{options_type}'."
     end

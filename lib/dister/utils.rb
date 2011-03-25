@@ -1,7 +1,7 @@
 module Dister
   module Utils
     module_function
-    # Shows message and prints a dot per second until the block code 
+    # Shows message and prints a dot per second until the block code
     # terminates its execution.
     # Exceptions raised by the block are displayed and program exists with
     # error status 1.
@@ -34,10 +34,10 @@ module Dister
     # Return the file size with a readable style.
     def readable_file_size(size, precision)
       case
-        when size == 1 : "1 Byte"
-        when size < KILO_SIZE : "%d Bytes" % size
-        when size < MEGA_SIZE : "%.#{precision}f KB" % (size / KILO_SIZE)
-        when size < GIGA_SIZE : "%.#{precision}f MB" % (size / MEGA_SIZE)
+        when size == 1 then "1 Byte"
+        when size < KILO_SIZE then "%d Bytes" % size
+        when size < MEGA_SIZE then "%.#{precision}f KB" % (size / KILO_SIZE)
+        when size < GIGA_SIZE then "%.#{precision}f MB" % (size / MEGA_SIZE)
         else "%.#{precision}f GB" % (size / GIGA_SIZE)
       end
     end
