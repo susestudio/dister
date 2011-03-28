@@ -198,6 +198,12 @@ module Dister
 
     # Use bundler to download and package all required gems for the app.
     def package_gems
+      if !File.exists?("#{APP_ROOT}/Gemfile")
+        puts "Gemfile missing, cannot use bundler"
+        puts 'Either create a Gemfile or use "dister package add" command'
+        return
+      end
+
       puts 'Packaging gems...'
       system "cd #{APP_ROOT}"
       system "rm -R vendor/cache" if File.exists?("#{APP_ROOT}/vendor/cache")
