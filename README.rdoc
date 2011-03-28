@@ -3,10 +3,16 @@ The idea is that thor programms call different thor programms.
 More interesting things are here:
 
 dister/lib/dister/cli.rb:15
+
 dister/lib/plugins/helloworld.rb
 
 
+
 Example usage:
+
 ./bin/dister
+
 ./bin/dister first_plugin
+
 ./bin/dister first_plugin hello
+
