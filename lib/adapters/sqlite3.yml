@@ -1,4 +1,4 @@
-package_name:
+packages:
   - sqlite3
   - rubygem-sqlite3
 cmdline_tool: sqlite3
