@@ -232,7 +232,7 @@ module Dister
       File.open(config_path, 'w') do |config_file|
         config_file.write(config_content)
       end
-      
+
       @db_adapter = get_db_adapter
       create_db_user_file = "#{APP_ROOT}/.dister/create_db_user.sql"
       FileUtils.rm(create_db_user_file, :force => true)
@@ -352,6 +352,9 @@ module Dister
       when "11.3"
         url += "openSUSE_11.3"
         name += " 11.3"
+      when "11.4"
+        url += "openSUSE_11.4"
+        name += " 11.4"
       when "SLED10_SP2", "SLED10_SP3", "SLES10_SP2", "SLES10_SP3"
         url += "SLE_10/"
         name += " SLE10"
