@@ -74,8 +74,8 @@ module Dister
 
       # Search in local options first, since they override global options.
       case option_key
-        when @local.keys.include?(option_key) : 'local'
-        when @global.keys.include?(option_key) : 'global'
+        when @local.keys.include?(option_key) then 'local'
+        when @global.keys.include?(option_key) then 'global'
         else
           if %w(username api_key api_path).include?(option_key)
             # Credentials are stored globally per default.
