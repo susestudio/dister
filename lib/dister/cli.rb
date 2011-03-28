@@ -12,7 +12,8 @@ module Dister
 
     desc "first_plugin", "Prints 'hello world'"
     def first_plugin option=""
-      system("ruby lib/dister/plugins/helloworld.rb #{option}")
+      path = File.join(File.expand_path('../plugins', __FILE__),"helloworld.rb")
+      system("ruby #{path} #{option}")
     end
 
     private
