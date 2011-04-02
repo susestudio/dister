@@ -37,8 +37,9 @@ class CoreTest < Test::Unit::TestCase
       end
 
       should 'package all required gems' do
+        File.expects(:exists?).returns(true)
         @core.expects(:system).with("cd #{Dister::Core::APP_ROOT}").once.returns(true)
-        File.expects(:exists?).once.returns(true)
+        File.expects(:exists?).returns(true)
         @core.expects(:system).with("rm -R vendor/cache").once.returns(true)
         @core.expects(:system).with("bundle package").once.returns(true)
         @core.package_gems
