@@ -17,7 +17,9 @@ module Dister
       @connection = StudioApi::Connection.new(
         @options.username,
         @options.api_key,
-        @options.api_path
+        @options.api_path,
+        :proxy   => @options.proxy,           # proxy can be nil
+        :timeout => (@options.timeout || 60)  # default to 60s
       )
       # Try the connection once to determine whether credentials are correct.
       @connection.api_version

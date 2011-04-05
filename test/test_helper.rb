@@ -21,7 +21,7 @@ end
 
 module StudioApi
   class Connection
-    def initialize username, key, api_url
+    def initialize username, key, api_url, options={}
       true
     end
 
