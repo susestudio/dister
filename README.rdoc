@@ -80,3 +80,7 @@ Building can be triggered using the following command:
 A nice progress bar will be shown.
 
 TODO: write more documentation.
+
+== License
+
+Dister is released under the MIT license.
