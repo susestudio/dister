@@ -394,6 +394,23 @@ module Dister
       end
     end
 
+    def testdrive(build_set)
+      build = build_set[0] # for now we just take the first available build
+      testdrive = Utils::execute_printing_progress "Starting testdrive" do
+        begin
+          StudioApi::Testdrive.create(:build_id => build.id)
+        rescue
+          STDERR.puts $!
+          exit 1
+        end
+      end
+      # NOTE can't get http to work, so lets just provide vnc info for now
+      puts "Connect to your testdrive using VNC:"
+      vnc = testdrive.server.vnc
+      puts "Server: #{vnc.host}:#{vnc.port}"
+      puts "Password: #{vnc.password}"
+    end
+
     def download(build_set)
       # Choose the build(s) to download.
       to_download = []
