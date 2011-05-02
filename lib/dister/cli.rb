@@ -57,6 +57,14 @@ module Dister
       @core.download(@builds)
     end
 
+    desc "testdrive", "Testdrive the appliance."
+    def testdrive
+      access_core
+      ensure_appliance_exists
+      ensure_build_exists
+      @core.testdrive(@builds)
+    end
+
     desc "format list|add|rm FORMAT", "Enables building of FORMAT"
     method_option :all, :type => :boolean, :default => false, :required => false
     def format(operation,format = nil)
