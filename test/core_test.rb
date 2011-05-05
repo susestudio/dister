@@ -18,6 +18,7 @@ class CoreTest < Test::Unit::TestCase
       end
 
       should "upload an existing files" do
+        STDOUT.stubs(:puts)
         FileUtils.touch "foo"
         core = Dister::Core.new
         core.stubs(:puts)
