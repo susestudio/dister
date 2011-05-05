@@ -114,6 +114,49 @@ class CliTest < Test::Unit::TestCase
         end
       end
 
+      should "exit if no base system is available" do
+        STDERR.stubs(:puts)
+        Dister::Core.any_instance.stubs(:basesystems).returns([])
+        assert_raise SystemExit do
+          Dister::Cli.start(['create', 'foo'])
+        end
+      end
+
+      context "openSUSE base system is not available" do
+        setup do
+          @basesystems = ["SLED10_SP2", "SLES10_SP2", "SLED11", "SLES11",
+                          "SLES11_SP1", "SLED11_SP1", "SLED10_SP3",
+                          "SLES10_SP3", "SLES11_SP1_VMware"]
+          Dister::Core.any_instance.stubs(:basesystems).returns(@basesystems)
+        end
+
+        should "ask the user which base system to use" do
+          Thor::Shell::Color.any_instance.stubs(:say)
+          Thor::Shell::Color.any_instance.expects(:ask).returns(1)
+          fake_app = mock()
+          fake_app.stubs(:edit_url).returns("http://susestudio.com")
+          Dister::Core.any_instance.expects(:create_appliance).\
+                                    with("foo", "JeOS", @basesystems[0], "i686").\
+                                    returns(fake_app)
+
+          assert_nothing_raised do
+            Dister::Cli.start(['create', 'foo'])
+          end
+        end
+        
+        should "not ask the user which base system to use if there's a preference" do
+          Thor::Shell::Color.any_instance.expects(:ask).never
+          fake_app = mock()
+          fake_app.stubs(:edit_url).returns("http://susestudio.com")
+          Dister::Core.any_instance.expects(:create_appliance).\
+                                    with("foo", "JeOS", @basesystems[0], "i686").\
+                                    returns(fake_app)
+          assert_nothing_raised do
+            Dister::Cli.start(['create', 'foo', "--basesystem", @basesystems[0]])
+          end
+        end
+      end
+
       should "detect bad combination of template and basesystem" do
         STDERR.stubs(:puts)
         assert_raise(SystemExit) do

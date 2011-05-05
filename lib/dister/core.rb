@@ -291,7 +291,7 @@ module Dister
             begin
               choice = @shell.ask("Which repo do you want to use? "\
                                   "[1-#{repositories.size+1}]")
-            end while (choice.to_i > (repositories.size+1))
+            end while (choice.to_i > (repositories.size+1) || choice.to_i < 1)
             if (choice.to_i == (repositories.size+1))
               abort("Package not added.")
             else

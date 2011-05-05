@@ -32,7 +32,27 @@ module Dister
       ensure_valid_option options[:arch], VALID_ARCHS, "arch"
       ensure_valid_option options[:template], VALID_TEMPLATES, "template"
       basesystems = @core.basesystems
-      basesystem = options[:basesystem] || basesystems.find_all{|a| a =~ /\d+\.\d+/}.sort.last
+      if basesystems.empty?
+        STDERR.puts "No basesystem found, contact server administrator"
+        exit 1
+      end
+
+      if options[:basesystem].nil?
+        # attempt to find latest version of openSUSE
+        basesystem = basesystems.find_all{|a| a =~ /\d+\.\d+/}.sort.last
+        if basesystem.nil?
+          # apparently this server doesn't offer openSUSE basesystem
+          @shell.say "Available base systems:"
+          basesystems.each_with_index { |b,i| @shell.say "#{i+1} - #{b}" }
+          begin
+            choice = @shell.ask("Which base system do you want to use?"\
+                                "[1-#{basesystems.size}]")
+          end while (choice.to_i > basesystems.size || choice.to_i < 1)
+          basesystem = basesystems[choice.to_i - 1]
+        end
+      else
+        basesystem = options[:basesystem]
+      end
       ensure_valid_option basesystem, basesystems, "base system"
       # Create appliance and add patterns required to build native gems.
       @core.create_appliance(appliance_name, options[:template], basesystem, options[:arch])
