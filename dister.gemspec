@@ -7,7 +7,7 @@ Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
   s.authors     = ['Flavio Castelli', 'Dominik Mayer']
   s.email       = ['flavio@castelli.name','dmayer@novell.com']
-  s.homepage    = "https://features.opensuse.org/311133"
+  s.homepage    = "https://github.com/flavio/dister"
   s.summary     = "Heroku like solution for SUSE Studio"
   s.description = "Turn your rails app into a SUSE Studio appliance in a few steps."
 
