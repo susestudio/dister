@@ -1,4 +1,3 @@
-require 'ruby-debug'
 module Dister
   class Downloader
     attr_reader :filename
