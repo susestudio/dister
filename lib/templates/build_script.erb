@@ -17,5 +17,6 @@ sed -i.bak 's/^\(APACHE_MODULES=.*\)"/\1 passenger"/' /etc/sysconfig/apache2
 
 # enable services 
 insserv /etc/init.d/apache2
+<% unless @db_adapter.nil? %>  
 insserv /etc/init.d/<%= @db_adapter.daemon_name %>
-
+<% end %>

@@ -18,7 +18,7 @@ then
   echo "Running SUSE Studio first boot script..."
   cd <%= rails_root %>
   bundle install --local
-  
+<% unless @db_adapter.nil? %>  
   # create db user
   if [ -f /root/create_db_user.sql ]
   then
@@ -33,5 +33,5 @@ then
 <% else %>
   <%= @db_adapter.restore_dump_cmd %>
 <% end %>
-
+<% end %>
 fi

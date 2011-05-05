@@ -61,8 +61,10 @@ module Dister
       self.add_package "devel_ruby"
       self.add_package 'rubygem-bundler'
       self.add_package 'rubygem-passenger-apache2'
-      @db_adapter.packages.each do |p|
-        self.add_package p
+      unless @db_adapter.nil?
+        @db_adapter.packages.each do |p|
+          self.add_package p
+        end
       end
 
       Utils::execute_printing_progress "Uploading build scripts" do
@@ -236,10 +238,12 @@ module Dister
       end
 
       @db_adapter = get_db_adapter
-      create_db_user_file = "#{APP_ROOT}/.dister/create_db_user.sql"
-      FileUtils.rm(create_db_user_file, :force => true)
-      File.open(create_db_user_file, 'w') do |file|
-        file.write(@db_adapter.create_user_cmd)
+      unless @db_adapter.nil?
+        create_db_user_file = "#{APP_ROOT}/.dister/create_db_user.sql"
+        FileUtils.rm(create_db_user_file, :force => true)
+        File.open(create_db_user_file, 'w') do |file|
+          file.write(@db_adapter.create_user_cmd)
+        end
       end
     end
 
@@ -472,10 +476,14 @@ module Dister
     def get_db_adapter
       db_config_file = "#{APP_ROOT}/config/database.yml"
       if !File.exists?(db_config_file)
-        STDERR.puts "Cannot find #{db_config_file}."
-        exit 1
+        print "Cannot find database configuration file, "\
+              "database handling disabled."
+        shell = Thor::Shell::Color.new
+        shell.say_status("[WARN]", "", :YELLOW)
+        nil
+      else
+        Dister::DbAdapter.new db_config_file
       end
-      @db_adapter ||= Dister::DbAdapter.new db_config_file
     end
   end
 end
