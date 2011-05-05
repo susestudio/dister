@@ -442,16 +442,15 @@ module Dister
       # Download selected builds.
       to_download.each do |b|
         puts "Going to download #{b.to_s}"
-        d = Downloader.new(b.download_url.sub("https:", "http:"),
-                           "Downloading", b.compressed_image_size.to_i)
+        d = Downloader.new(b.download_url.sub("https:", "http:"),"Downloading")
         if File.exists? d.filename
           overwrite = @shell.ask("Do you want to overwrite file #{d.filename}? (y/n)")
           exit 0 if overwrite == 'n'
         end
         begin
           d.start
-          execute_printing_progress "Calculating md5sum" do
-            Digest::MD5.file d.filename
+          Utils::execute_printing_progress "Calculating md5sum" do
+            digest = Digest::MD5.file d.filename
             raise "digest check not passed" if digest.to_s != b.checksum.md5
           end
         rescue
