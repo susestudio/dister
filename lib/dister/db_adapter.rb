@@ -1,5 +1,3 @@
-require 'erb'
-
 module Dister
   class DbAdapter
 

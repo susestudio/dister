@@ -1,4 +1,5 @@
 require 'rubygems'
+require 'erb'
 require 'thor'
 require 'studio_api'
 require 'yaml'
