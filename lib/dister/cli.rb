@@ -1,11 +1,6 @@
 module Dister
 
   class Cli < Thor
-
-    VALID_TEMPLATES = %w(JeOS Server X Gnome KDE)
-    VALID_FOMATS = %w(oem vmx iso xen) #TODO: add other formats
-    VALID_ARCHS = %w(i686 x86_64)
-
     include Thor::Actions
 
     # Returns Dister's root directory.
@@ -90,14 +85,14 @@ module Dister
     def format(operation,format = nil)
       access_core
       ensure_valid_option operation, %w(add rm list), "operation"
-      if operation == 'list' and options[:all]
+      if operation == 'list'
         puts "Available formats:"
-        puts VALID_FOMATS
+        puts VALID_FORMATS
       else
         existing_types = @core.options.build_types || []
         chosen_types = case operation
           when "add"
-            ensure_valid_option format, VALID_FOMATS, "format"
+            ensure_valid_option format, VALID_FORMATS, "format"
             @core.options.build_types = (existing_types + [format]).uniq
           when "rm"
             @core.options.build_types = (existing_types - [format])
