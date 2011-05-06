@@ -77,13 +77,36 @@ module Dister
     end
 
     # Builds the appliance
-    def build
+    #
+    # @param [Hash] build_options
+    # @option build_options [Boolean] :force
+    def build build_options = {}
       verify_status
-      #TODO: build using another format
-      build = StudioApi::RunningBuild.create(
-        :appliance_id => @options.appliance_id,
-        :image_type => "oem"
-      )
+      #TODO:
+      # * build using another format
+      force   = build_options[:force]
+      version = nil
+      begin
+        params = {
+                   :appliance_id => @options.appliance_id,
+                   :image_type   => "oem"
+                 }
+        params[:force]   = force if force
+        params[:version] = version if version
+        build = StudioApi::RunningBuild.create(params)
+      rescue StudioApi::ImageAlreadyExists
+        @shell.say 'An image with the same version already exists'
+        overwrite = @shell.ask 'Do you want to overwrite it? (y/n)'
+        if overwrite == 'y'
+          force = true
+          retry
+        else
+          begin
+            version = @shell.ask 'Enter new version number:'
+          end until !version.blank?
+          retry
+        end
+      end
 
       build.reload
       if build.state == "queued"

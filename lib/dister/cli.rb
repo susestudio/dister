@@ -4,10 +4,6 @@ module Dister
   # the +dister+ command line tool. Use +dister --help+ for usage instructions.
   class Cli < Thor
 
-    VALID_TEMPLATES = %w(JeOS Server X Gnome KDE)
-    VALID_FOMATS = %w(oem vmx iso xen) # @nodoc TODO: add other formats
-    VALID_ARCHS = %w(i686 x86_64)
-
     include Thor::Actions
 
     # NOTE: Some of Thor's actions require this method to be defined.
@@ -61,10 +57,11 @@ module Dister
     end
 
     desc "build", "Build the appliance."
+    method_option :force, :type => :boolean, :default => false, :required => false
     def build
       access_core
       ensure_appliance_exists
-      if @core.build
+      if @core.build options
         puts "Appliance successfully built."
       else
         puts "Build failed."
@@ -92,14 +89,14 @@ module Dister
     def format(operation,format = nil)
       access_core
       ensure_valid_option operation, %w(add rm list), "operation"
-      if operation == 'list' and options[:all]
+      if operation == 'list'
         puts "Available formats:"
-        puts VALID_FOMATS
+        puts VALID_FORMATS
       else
         existing_types = @core.options.build_types || []
         chosen_types = case operation
           when "add"
-            ensure_valid_option format, VALID_FOMATS, "format"
+            ensure_valid_option format, VALID_FORMATS, "format"
             @core.options.build_types = (existing_types + [format]).uniq
           when "rm"
             @core.options.build_types = (existing_types - [format])

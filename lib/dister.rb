@@ -7,6 +7,7 @@ require 'progressbar'
 require 'curb'
 
 require File.expand_path('../dister/cli', __FILE__)
+require File.expand_path('../dister/constants', __FILE__)
 require File.expand_path('../dister/core', __FILE__)
 require File.expand_path('../dister/options', __FILE__)
 require File.expand_path('../dister/utils', __FILE__)
