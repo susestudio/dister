@@ -1,12 +1,15 @@
 module Dister
+
+  # Curl wrapper for downloading appliance builds.
   class Downloader
     attr_reader :filename
 
-
+    # @param [String] url URL of file to be downloaded
+    # @param [String] message Message to be displayed while downloading
     def initialize url, message
       @filename = File.basename(url)
       @message  = message
-      
+
       # setup curl
       @curl = Curl::Easy.new
       @curl.url = url
@@ -21,6 +24,7 @@ module Dister
       end
     end
 
+    # Starts the download
     def start
       @file = File.open(@filename, "wb")
       @pbar = ProgressBar.new(@message, 100)
@@ -53,5 +57,7 @@ module Dister
         @file.close
       end
     end
+
   end
+
 end

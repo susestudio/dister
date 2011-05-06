@@ -1,16 +1,17 @@
 require 'digest/md5'
-require 'erb'
 
 module Dister
 
+  # Core functionality
   class Core
 
     attr_reader :options, :shell
 
+    # Absolute path to the root of the current application
     APP_ROOT = File.expand_path('.')
 
     # Connect to SUSE Studio and verify the user's credentials.
-    # Sets @options, @shell and @connection for further use.
+    # Sets +@options+, +@shell+ and +@connection+ for further use.
     def initialize
       @options ||= Options.new
       @shell = Thor::Shell::Basic.new
@@ -45,7 +46,7 @@ module Dister
     end
 
     # Creates a new appliance.
-    # Returns the new appliance.
+    # @return [StudioApi::Appliance] the new appliance
     def create_appliance(name, template, basesystem, arch)
       match = check_template_and_basesystem_availability(template, basesystem)
       exit 1 if match.nil?
@@ -75,6 +76,10 @@ module Dister
       app
     end
 
+    # Builds the appliance
+    #
+    # @param [Hash] build_options
+    # @option build_options [Boolean] :force
     def build build_options = {}
       verify_status
       #TODO:
@@ -134,7 +139,8 @@ module Dister
       build.state == 'finished'
     end
 
-    # Returns an app's appliance (or nil if none exist).
+    # Finds the appliance for the current app
+    # @return [StudioApi::Appliance] the app's appliance (or nil if none exist).
     def appliance
       if @appliance.nil?
         begin
@@ -150,6 +156,8 @@ module Dister
       end
     end
 
+    # Finds all builds
+    # @return [Array<StudioApi::Build>]
     def builds
       StudioApi::Build.find(:all, :params => {:appliance_id => @options.appliance_id})
     end
@@ -188,15 +196,21 @@ module Dister
     end
 
     # Uploads a file identified by filename to a SuSE Studio Appliance
-    # options is an hash. it can have the following keys:
-    # - filename (optional) - The name of the file in the filesystem.
-    # - path (optional) - The path where the file will be stored.
-    # - owner (optional) - The owner of the file.
-    # - group (optional) - The group of the file.
-    # - permissions (optional) - The permissions of the file.
-    # - enabled (optional) - Used to enable/disable this file for the builds.
-    # - url (optional) - The url of the file to add from the internet (HTTP and FTP are supported) when using the web upload method
-    # This method returns true if the file has been successfully uploaded
+    #
+    # @param [String] filename name of file to upload
+    # @param [Hash] upload_options upload options (all parameters are optional)
+    # @option upload_options [String] filename The name of the file in the
+    #   filesystem
+    # @option upload_options [String] path The path where the file will be stored
+    # @option upload_options [String] owner The owner of the file
+    # @option upload_options [String] group The group of the file
+    # @option upload_options [String] permissions The permissions of the file
+    # @option upload_options [String] enabled Used to enable/disable this file
+    #   for the builds
+    # @option upload_options [String] url The url of the file to add from the
+    #   internet (HTTP and FTP are supported) when using the web upload method
+    #
+    # @return [Boolean] true if the file has been successfully uploaded
     def file_upload filename, upload_options={}
       if File.exists? filename
         # Delete existing (obsolete) file.
@@ -280,6 +294,8 @@ module Dister
       self.file_upload("#{APP_ROOT}/.dister/create_db_user.sql", upload_options)
     end
 
+    # Add a package to the appliance
+    # @param [String] package the name of the package
     def add_package package
       appliance_basesystem = appliance.basesystem
       result = appliance.search_software(package)#.find{|s| s.name == package }
@@ -330,6 +346,8 @@ module Dister
       end
     end
 
+    # Remove a package from the appliance
+    # @param [String] package the name of the package
     def rm_package package
       Utils::execute_printing_progress "Removing #{package} package" do
         appliance.remove_package(package)
@@ -337,6 +355,7 @@ module Dister
     end
 
     # Uploads our configuration scripts
+    # @return [true] if the scripts are successfully uploaded
     def upload_configurations_scripts
       rails_root = "/srv/www/#{@options.app_name}"
 
@@ -359,7 +378,7 @@ module Dister
     end
 
     # Asks Studio to mirror a repository.
-    # Returns a StudioApi::Repository object
+    # @return [StudioApi::Repository]
     def import_repository url, name
       StudioApi::Repository.import url, name
     end
@@ -492,6 +511,7 @@ module Dister
       @options.api_key = @shell.ask("API key:\t")
     end
 
+    # @return [Dister::DbAdapter]
     def get_db_adapter
       db_config_file = "#{APP_ROOT}/config/database.yml"
       if !File.exists?(db_config_file)
@@ -504,5 +524,7 @@ module Dister
         Dister::DbAdapter.new db_config_file
       end
     end
+
   end
+
 end

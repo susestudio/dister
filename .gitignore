@@ -3,3 +3,5 @@ pkg
 .dister
 rdoc
 Gemfile.lock
+doc
+.yardoc

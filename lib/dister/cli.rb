@@ -1,12 +1,21 @@
 module Dister
 
+  # This is the public facing command line interface which is available through
+  # the +dister+ command line tool. Use +dister --help+ for usage instructions.
   class Cli < Thor
+
     include Thor::Actions
 
-    # Returns Dister's root directory.
     # NOTE: Some of Thor's actions require this method to be defined.
+    # @return [String] Dister's root directory.
     def self.source_root
       File.expand_path('../../',__FILE__)
+    end
+
+    desc "version", "Show dister version"
+    def version
+      require "dister/version"
+      puts "dister version #{Dister::VERSION}"
     end
 
     desc "config OPTION VALUE", "set OPTION value to VALUE"

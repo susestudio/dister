@@ -1,6 +1,10 @@
 module Dister
+
+  # Shared utility methods
   module Utils
+
     module_function
+
     # Shows message and prints a dot per second until the block code
     # terminates its execution.
     # Exceptions raised by the block are displayed and program exists with
@@ -31,7 +35,10 @@ module Dister
     MEGA_SIZE = 1048576.0
     KILO_SIZE = 1024.0
 
-    # Return the file size with a readable style.
+    # @param [Number] size Size to be converted
+    # @param [Number] precision Number of decimals desired
+    #
+    # @return [String] Return the file size with a readable style.
     def readable_file_size(size, precision)
       case
         when size == 1 then "1 Byte"
