@@ -1,15 +1,22 @@
 require 'fileutils'
 
 module Dister
+
+  # Class for handling user- and application-specific settings
   class Options
 
+    # Default API path, used unless a custom path is specified
     SUSE_STUDIO_DOT_COM_API_PATH = 'https://susestudio.com/api/v2/user'
+    # Path to global (per-user) options file
     GLOBAL_PATH = "#{File.expand_path('~')}/.dister"
+    # Path to app-specific options file
     LOCAL_PATH = "#{Dister::Core::APP_ROOT}/.dister/options.yml"
 
     attr_reader :use_only_local
 
     # Read options from file.
+    #
+    # @param [Boolean] use_only_local Use only local options?
     def initialize use_only_local=false
       @use_only_local = use_only_local
       reload
@@ -27,7 +34,8 @@ module Dister
       end
     end
 
-    # Read @global and @local option files.
+    # Read +@global+ and +@local+ option files. Run this method if their
+    # contents has changed.
     def reload
       if @use_only_local
         @global = {}
@@ -104,6 +112,8 @@ module Dister
     # Returns a hash consisting of both global and local options.
     # All options can be read through this method.
     # NOTE: Local options override global options.
+    #
+    # @return [Hash] a hash consisting of both global and local options
     def provide
       @global.merge(@local)
     end
