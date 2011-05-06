@@ -77,9 +77,12 @@ module Dister
 
     def build
       verify_status
-      #TODO: build using another format
+      #TODO:
+      # * build using another format
+      # * prompt for overwrite
       build = StudioApi::RunningBuild.create(
         :appliance_id => @options.appliance_id,
+        :force => true,
         :image_type => "oem"
       )
 
