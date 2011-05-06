@@ -1,3 +1,7 @@
+Fri May 06 16:55:23 CEST 2011  Flavio Castelli <flavio@castelli.name>
+
+	* Fixed a method missing error.
+
 Fri May 06 16:46:10 CEST 2011  Flavio Castelli <flavio@castelli.name>
 
 	* appliance building: ask the user what to do when there's already an
