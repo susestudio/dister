@@ -91,12 +91,14 @@ module Dister
         build = StudioApi::RunningBuild.create(params)
       rescue StudioApi::ImageAlreadyExists
         @shell.say 'An image with the same version already exists'
-        overwrite = @shell.ask? 'Do you want to overwrite it? (y/n)'
+        overwrite = @shell.ask 'Do you want to overwrite it? (y/n)'
         if overwrite == 'y'
           force = true
           retry
         else
-          version = @shell.ask? 'Enter new version number:'
+          begin
+            version = @shell.ask 'Enter new version number:'
+          end until !version.blank?
           retry
         end
       end

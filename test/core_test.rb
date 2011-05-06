@@ -82,7 +82,7 @@ class CoreTest < Test::Unit::TestCase
             raises(StudioApi::ImageAlreadyExists).\
             in_sequence(build_sequence)
           @core.shell.expects(:say).in_sequence(build_sequence)
-          @core.shell.expects(:ask?).in_sequence(build_sequence).\
+          @core.shell.expects(:ask).in_sequence(build_sequence).\
                       returns('y')
           fake_build = mock()
           StudioApi::RunningBuild.expects(:create).\
@@ -108,9 +108,9 @@ class CoreTest < Test::Unit::TestCase
             raises(StudioApi::ImageAlreadyExists).\
             in_sequence(build_sequence)
           @core.shell.expects(:say).in_sequence(build_sequence)
-          @core.shell.expects(:ask?).in_sequence(build_sequence).\
+          @core.shell.expects(:ask).in_sequence(build_sequence).\
                       returns('n')
-          @core.shell.expects(:ask?).in_sequence(build_sequence).\
+          @core.shell.expects(:ask).in_sequence(build_sequence).\
                       returns(new_version)
           fake_build = mock()
           StudioApi::RunningBuild.expects(:create).\
