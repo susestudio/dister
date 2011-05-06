@@ -1,3 +1,7 @@
+--markup rdoc
+--default-return ''
+--no-private
 --title "Documentation for dister"
-lib/**/*.rb -
-LICENSE
+--exclude studio_api
+lib/**/*.rb
+- LICENSE
