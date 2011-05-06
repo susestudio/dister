@@ -8,13 +8,13 @@ module Dister
       if !config.has_key?("production")
         STDERR.puts "There's no configuration for the production environment"
       end
-      
+
       @adapter  = config["production"]["adapter"]
       @user     = config["production"]["username"]
-      @password = config["production"]["password"] 
-      @dbname   = config["production"]["adapter"] 
+      @password = config["production"]["password"]
+      @dbname   = config["production"]["adapter"]
       @dump     = dump
-      
+
       filename = File.expand_path("../../adapters/#{@adapter}.yml", __FILE__)
       raise "There's no adapter for #{@adapter}" if !File.exists?(filename)
 
@@ -25,7 +25,7 @@ module Dister
       return false if @dump.nil?
       return File.exists? @dump
     end
-    
+
     def cmdline_tool
       @adapter_config["cmdline_tool"]
     end
