@@ -12,6 +12,12 @@ module Dister
       File.expand_path('../../',__FILE__)
     end
 
+    desc "version", "Show dister version"
+    def version
+      require "dister/version"
+      puts "dister version #{Dister::VERSION}"
+    end
+
     desc "config OPTION VALUE", "set OPTION value to VALUE"
     method_option :local,
       :type => :boolean, :default => false, :required => false
