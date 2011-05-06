@@ -175,14 +175,17 @@ module Dister
     # Uploads a file identified by filename to a SuSE Studio Appliance
     #
     # @param [String] filename name of file to upload
-    # @param [Hash] upload_options the following keys can be used:
-    #   - filename (optional) - The name of the file in the filesystem.
-    #   - path (optional) - The path where the file will be stored.
-    #   - owner (optional) - The owner of the file.
-    #   - group (optional) - The group of the file.
-    #   - permissions (optional) - The permissions of the file.
-    #   - enabled (optional) - Used to enable/disable this file for the builds.
-    #   - url (optional) - The url of the file to add from the internet (HTTP and FTP are supported) when using the web upload method
+    # @param [Hash] upload_options upload options (all parameters are optional)
+    # @option upload_options [String] filename The name of the file in the
+    #   filesystem
+    # @option upload_options [String] path The path where the file will be stored
+    # @option upload_options [String] owner The owner of the file
+    # @option upload_options [String] group The group of the file
+    # @option upload_options [String] permissions The permissions of the file
+    # @option upload_options [String] enabled Used to enable/disable this file
+    #   for the builds
+    # @option upload_options [String] url The url of the file to add from the
+    #   internet (HTTP and FTP are supported) when using the web upload method
     #
     # @return [Boolean] true if the file has been successfully uploaded
     def file_upload filename, upload_options={}
