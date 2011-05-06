@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency "curb"
   s.add_dependency "progressbar"
-  s.add_dependency "studio_api", "~>3.1.0"
+  s.add_dependency "studio_api", "~>3.1.1"
   s.add_dependency "thor", "~>0.14.0"
 
   s.add_development_dependency "bundler", "~>1.0.0"
