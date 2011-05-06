@@ -1,15 +1,17 @@
 module Dister
 
+  # This is the public facing command line interface which is available through
+  # the +dister+ command line tool. Use +dister --help+ for usage instructions.
   class Cli < Thor
 
     VALID_TEMPLATES = %w(JeOS Server X Gnome KDE)
-    VALID_FOMATS = %w(oem vmx iso xen) #TODO: add other formats
+    VALID_FOMATS = %w(oem vmx iso xen) # @nodoc TODO: add other formats
     VALID_ARCHS = %w(i686 x86_64)
 
     include Thor::Actions
 
-    # Returns Dister's root directory.
     # NOTE: Some of Thor's actions require this method to be defined.
+    # @return [String] Dister's root directory.
     def self.source_root
       File.expand_path('../../',__FILE__)
     end
