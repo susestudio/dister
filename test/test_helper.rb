@@ -1,4 +1,5 @@
 require File.expand_path('../../lib/dister',__FILE__)
+require 'bundler/setup' # Use bundled environment for testing
 require 'test/unit'
 require 'mocha'
 require 'shoulda'
