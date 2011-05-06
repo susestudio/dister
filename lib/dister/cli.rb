@@ -54,10 +54,11 @@ module Dister
     end
 
     desc "build", "Build the appliance."
+    method_option :force, :type => :boolean, :default => false, :required => false
     def build
       access_core
       ensure_appliance_exists
-      if @core.build
+      if @core.build options
         puts "Appliance successfully built."
       else
         puts "Build failed."
