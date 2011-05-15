@@ -5,6 +5,7 @@ require 'studio_api'
 require 'yaml'
 require 'progressbar'
 require 'curb'
+require 'highline/import'
 
 require File.expand_path('../dister/cli', __FILE__)
 require File.expand_path('../dister/constants', __FILE__)
