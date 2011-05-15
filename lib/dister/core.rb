@@ -474,24 +474,14 @@ module Dister
       if build_set.size == 1
         to_download << build_set.first
       else
-        build_set.each_with_index do |build, index|
-          puts "#{index+1}) #{build.to_s}"
-        end
-        puts "#{build_set.size+1}) All of them."
-        puts "#{build_set.size+2}) None."
-        begin
-          choice = @shell.ask "Which appliance do you want to download? [1-#{build_set.size+1}]"
-        end while (choice.to_i > (build_set.size+2))
-        if choice.to_i == (build_set.size+2)
-          # none selected
-          exit 0
-        elsif choice.to_i == (build_set.size+1)
-          # all selected
-          to_download = build_set
-        else
-          to_download << build_set[choice.to_i-1]
+        to_download = choose do |menu|
+          menu.choices *build_set do |i| [i] end # wrap choice in an array
+          menu.choice("All of them.") { build_set }
+          menu.choice("None.") { exit 0 }
+          menu.prompt = "Which appliance do you want to download?"
         end
       end
+
       # Download selected builds.
       to_download.each do |b|
         puts "Going to download #{b.to_s}"
