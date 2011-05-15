@@ -247,7 +247,11 @@ module Dister
       puts 'Packaging gems...'
       system "cd #{APP_ROOT}"
       system "rm -R vendor/cache" if File.exists?("#{APP_ROOT}/vendor/cache")
-      system 'bundle package'
+      success = system 'bundle package'
+      unless success
+        STDERR.puts "`bundle package` failed, exiting"
+        exit 1
+      end
       puts "Done!"
     end
 
