@@ -34,10 +34,10 @@ module Dister
       true
     rescue ActiveResource::UnauthorizedAccess
       puts 'A connection to SUSE Studio could not be established.'
-      keep_trying = @shell.ask(
+      keep_trying = @shell.yes?(
         'Would you like to re-enter your credentials and try again? (y/n)'
       )
-      if keep_trying == 'y'
+      if keep_trying
         update_credentials
         retry
       else
@@ -99,8 +99,7 @@ module Dister
         build = StudioApi::RunningBuild.create(params)
       rescue StudioApi::ImageAlreadyExists
         @shell.say 'An image with the same version already exists'
-        overwrite = @shell.ask 'Do you want to overwrite it? (y/n)'
-        if overwrite == 'y'
+        if @shell.yes? 'Do you want to overwrite it? (y/n)'
           force = true
           retry
         else
@@ -116,9 +115,7 @@ module Dister
         puts "Your build is queued. It will be automatically processed by "\
              "SUSE Studio. You can keep waiting or you can exit from dister."
         puts "Exiting from dister won't remove your build from the queue."
-        shell = Thor::Shell::Basic.new
-        keep_waiting = @shell.ask('Do you want to keep waiting (y/n)')
-        if keep_waiting == 'n'
+        if @shell.no?('Do you want to keep waiting (y/n)')
           exit 0
         end
 
@@ -309,9 +306,9 @@ module Dister
       if result.empty? #it is not found in available repos
         puts "'#{package}' has not been found in the repositories currently "\
              "added to your appliance."
-        keep_trying = @shell.ask('Would you like to search for this package '\
+        keep_trying = @shell.yes?('Would you like to search for this package '\
                                 'inside other repositories? (y/n)')
-        if keep_trying == 'y'
+        if keep_trying
           matches = appliance.search_software(package, :all_repos => true)\
                              .find_all { |s| s.name == package }
           repositories = matches.map do |r|
@@ -496,8 +493,9 @@ module Dister
         puts "Going to download #{b.to_s}"
         d = Downloader.new(b.download_url.sub("https:", "http:"),"Downloading")
         if File.exists? d.filename
-          overwrite = @shell.ask("Do you want to overwrite file #{d.filename}? (y/n)")
-          exit 0 if overwrite == 'n'
+          if @shell.no?("Do you want to overwrite file #{d.filename}? (y/n)")
+            exit 0
+          end
         end
         begin
           d.start
