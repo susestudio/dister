@@ -58,15 +58,12 @@ module Dister
       end
       @options.appliance_id = app.id
       ensure_devel_languages_ruby_extensions_repo_is_added
-      self.add_package "devel_C_C++"
-      self.add_package "devel_ruby"
-      self.add_package 'rubygem-bundler'
-      self.add_package 'rubygem-passenger-apache2'
-      unless @db_adapter.nil?
-        @db_adapter.packages.each do |p|
-          self.add_package p
-        end
-      end
+
+      default_packages = %w(devel_C_C++ devel_ruby
+                            rubygem-bundler rubygem-passenger-apache2)
+
+      self.add_packages(default_packages)
+      self.add_packages(@db_adapter.packages) unless @db_adapter.nil?
 
       Utils::execute_printing_progress "Uploading build scripts" do
         upload_configurations_scripts
@@ -344,6 +341,12 @@ module Dister
       Utils::execute_printing_progress "Adding #{package} package" do
         appliance.add_package(package)
       end
+    end
+
+    # Add a list of packages at once
+    # @param [Array<String>] packages
+    def add_packages(packages)
+      packages.each { |package| self.add_package(package) }
     end
 
     # Remove a package from the appliance
