@@ -46,6 +46,12 @@ module Dister
     end
 
     # Creates a new appliance.
+    #
+    # @param [String] name
+    # @param [String] template
+    # @param [String] basesystem
+    # @param [String] arch
+    #
     # @return [StudioApi::Appliance] the new appliance
     def create_appliance(name, template, basesystem, arch)
       match = check_template_and_basesystem_availability(template, basesystem)
@@ -170,6 +176,8 @@ module Dister
       end
     end
 
+    # Find available base systems
+    # @return [Array<String>] a list of available base systems
     def basesystems
       templates.collect(&:basesystem).uniq
     end
@@ -440,6 +448,7 @@ module Dister
       end
     end
 
+    # @param [Array] build_set
     def testdrive(build_set)
       build = build_set[0] # for now we just take the first available build
       testdrive = Utils::execute_printing_progress "Starting testdrive" do
@@ -457,6 +466,7 @@ module Dister
       puts "Password: #{vnc.password}"
     end
 
+    # @param [Array] build_set
     def download(build_set)
       # Choose the build(s) to download.
       to_download = []
