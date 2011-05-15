@@ -34,10 +34,10 @@ module Dister
       true
     rescue ActiveResource::UnauthorizedAccess
       puts 'A connection to SUSE Studio could not be established.'
-      keep_trying = @shell.ask(
+      keep_trying = @shell.yes?(
         'Would you like to re-enter your credentials and try again? (y/n)'
       )
-      if keep_trying == 'y'
+      if keep_trying
         update_credentials
         retry
       else
@@ -46,6 +46,12 @@ module Dister
     end
 
     # Creates a new appliance.
+    #
+    # @param [String] name
+    # @param [String] template
+    # @param [String] basesystem
+    # @param [String] arch
+    #
     # @return [StudioApi::Appliance] the new appliance
     def create_appliance(name, template, basesystem, arch)
       match = check_template_and_basesystem_availability(template, basesystem)
@@ -58,15 +64,12 @@ module Dister
       end
       @options.appliance_id = app.id
       ensure_devel_languages_ruby_extensions_repo_is_added
-      self.add_package "devel_C_C++"
-      self.add_package "devel_ruby"
-      self.add_package 'rubygem-bundler'
-      self.add_package 'rubygem-passenger-apache2'
-      unless @db_adapter.nil?
-        @db_adapter.packages.each do |p|
-          self.add_package p
-        end
-      end
+
+      default_packages = %w(devel_C_C++ devel_ruby
+                            rubygem-bundler rubygem-passenger-apache2)
+
+      self.add_packages(default_packages)
+      self.add_packages(@db_adapter.packages) unless @db_adapter.nil?
 
       Utils::execute_printing_progress "Uploading build scripts" do
         upload_configurations_scripts
@@ -96,8 +99,7 @@ module Dister
         build = StudioApi::RunningBuild.create(params)
       rescue StudioApi::ImageAlreadyExists
         @shell.say 'An image with the same version already exists'
-        overwrite = @shell.ask 'Do you want to overwrite it? (y/n)'
-        if overwrite == 'y'
+        if @shell.yes? 'Do you want to overwrite it? (y/n)'
           force = true
           retry
         else
@@ -113,9 +115,7 @@ module Dister
         puts "Your build is queued. It will be automatically processed by "\
              "SUSE Studio. You can keep waiting or you can exit from dister."
         puts "Exiting from dister won't remove your build from the queue."
-        shell = Thor::Shell::Basic.new
-        keep_waiting = @shell.ask('Do you want to keep waiting (y/n)')
-        if keep_waiting == 'n'
+        if @shell.no?('Do you want to keep waiting (y/n)')
           exit 0
         end
 
@@ -173,6 +173,8 @@ module Dister
       end
     end
 
+    # Find available base systems
+    # @return [Array<String>] a list of available base systems
     def basesystems
       templates.collect(&:basesystem).uniq
     end
@@ -245,7 +247,11 @@ module Dister
       puts 'Packaging gems...'
       system "cd #{APP_ROOT}"
       system "rm -R vendor/cache" if File.exists?("#{APP_ROOT}/vendor/cache")
-      system 'bundle package'
+      success = system 'bundle package'
+      unless success
+        STDERR.puts "`bundle package` failed, exiting"
+        exit 1
+      end
       puts "Done!"
     end
 
@@ -304,9 +310,9 @@ module Dister
       if result.empty? #it is not found in available repos
         puts "'#{package}' has not been found in the repositories currently "\
              "added to your appliance."
-        keep_trying = @shell.ask('Would you like to search for this package '\
+        keep_trying = @shell.yes?('Would you like to search for this package '\
                                 'inside other repositories? (y/n)')
-        if keep_trying == 'y'
+        if keep_trying
           matches = appliance.search_software(package, :all_repos => true)\
                              .find_all { |s| s.name == package }
           repositories = matches.map do |r|
@@ -344,6 +350,12 @@ module Dister
       Utils::execute_printing_progress "Adding #{package} package" do
         appliance.add_package(package)
       end
+    end
+
+    # Add a list of packages at once
+    # @param [Array<String>] packages
+    def add_packages(packages)
+      packages.each { |package| self.add_package(package) }
     end
 
     # Remove a package from the appliance
@@ -437,6 +449,7 @@ module Dister
       end
     end
 
+    # @param [Array] build_set
     def testdrive(build_set)
       build = build_set[0] # for now we just take the first available build
       testdrive = Utils::execute_printing_progress "Starting testdrive" do
@@ -454,37 +467,29 @@ module Dister
       puts "Password: #{vnc.password}"
     end
 
+    # @param [Array] build_set
     def download(build_set)
       # Choose the build(s) to download.
       to_download = []
       if build_set.size == 1
         to_download << build_set.first
       else
-        build_set.each_with_index do |build, index|
-          puts "#{index+1}) #{build.to_s}"
-        end
-        puts "#{build_set.size+1}) All of them."
-        puts "#{build_set.size+2}) None."
-        begin
-          choice = @shell.ask "Which appliance do you want to download? [1-#{build_set.size+1}]"
-        end while (choice.to_i > (build_set.size+2))
-        if choice.to_i == (build_set.size+2)
-          # none selected
-          exit 0
-        elsif choice.to_i == (build_set.size+1)
-          # all selected
-          to_download = build_set
-        else
-          to_download << build_set[choice.to_i-1]
+        to_download = choose do |menu|
+          menu.choices *build_set do |i| [i] end # wrap choice in an array
+          menu.choice("All of them.") { build_set }
+          menu.choice("None.") { exit 0 }
+          menu.prompt = "Which appliance do you want to download?"
         end
       end
+
       # Download selected builds.
       to_download.each do |b|
         puts "Going to download #{b.to_s}"
         d = Downloader.new(b.download_url.sub("https:", "http:"),"Downloading")
         if File.exists? d.filename
-          overwrite = @shell.ask("Do you want to overwrite file #{d.filename}? (y/n)")
-          exit 0 if overwrite == 'n'
+          if @shell.no?("Do you want to overwrite file #{d.filename}? (y/n)")
+            exit 0
+          end
         end
         begin
           d.start

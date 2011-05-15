@@ -45,14 +45,13 @@ module Dister
         # attempt to find latest version of openSUSE
         basesystem = basesystems.find_all{|a| a =~ /\d+\.\d+/}.sort.last
         if basesystem.nil?
-          # apparently this server doesn't offer openSUSE basesystem
-          @shell.say "Available base systems:"
-          basesystems.each_with_index { |b,i| @shell.say "#{i+1} - #{b}" }
-          begin
-            choice = @shell.ask("Which base system do you want to use?"\
-                                "[1-#{basesystems.size}]")
-          end while (choice.to_i > basesystems.size || choice.to_i < 1)
-          basesystem = basesystems[choice.to_i - 1]
+          # apparently this server doesn't offer openSUSE basesystem, so we
+          # present the user with a menu with available choices
+          basesystem = choose do |menu|
+            menu.header = "Available base systems"
+            menu.choices *basesystems
+            menu.prompt = "Which base system do you want to use?"
+          end
         end
       else
         basesystem = options[:basesystem]

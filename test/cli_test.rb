@@ -131,8 +131,7 @@ class CliTest < Test::Unit::TestCase
         end
 
         should "ask the user which base system to use" do
-          Thor::Shell::Color.any_instance.stubs(:say)
-          Thor::Shell::Color.any_instance.expects(:ask).returns(1)
+          HighLine.any_instance.stubs(:choose).returns("SLED10_SP2")
           fake_app = mock()
           fake_app.stubs(:edit_url).returns("http://susestudio.com")
           Dister::Core.any_instance.expects(:create_appliance).\
@@ -143,7 +142,7 @@ class CliTest < Test::Unit::TestCase
             Dister::Cli.start(['create', 'foo'])
           end
         end
-        
+
         should "not ask the user which base system to use if there's a preference" do
           Thor::Shell::Color.any_instance.expects(:ask).never
           fake_app = mock()
