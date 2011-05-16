@@ -15,6 +15,7 @@ Gem::Specification.new do |s|
   s.rubyforge_project         = "dister"
 
   s.add_dependency "curb"
+  s.add_dependency "highline", "~>1.6.1"
   s.add_dependency "progressbar"
   s.add_dependency "studio_api", "~>3.1.1"
   s.add_dependency "thor", "~>0.14.0"

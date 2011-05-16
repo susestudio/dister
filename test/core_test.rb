@@ -39,6 +39,11 @@ class CoreTest < Test::Unit::TestCase
         @core.stubs(:puts)
       end
 
+      should 'skip packaging gems unless there is a Gemfile' do
+        File.expects(:exists?).returns(false)
+        assert_nil @core.package_gems
+      end
+
       should 'package all required gems' do
         File.expects(:exists?).returns(true)
         @core.expects(:system).with("cd #{Dister::Core::APP_ROOT}").once.returns(true)
@@ -46,6 +51,17 @@ class CoreTest < Test::Unit::TestCase
         @core.expects(:system).with("rm -R vendor/cache").once.returns(true)
         @core.expects(:system).with("bundle package").once.returns(true)
         @core.package_gems
+      end
+
+      should 'exit if gem packaging fails' do
+        File.expects(:exists?).returns(true)
+        @core.expects(:system).with("cd #{Dister::Core::APP_ROOT}").once.returns(true)
+        File.expects(:exists?).returns(true)
+        @core.expects(:system).with("rm -R vendor/cache").once.returns(true)
+        @core.expects(:system).with("bundle package").once.returns(false)
+        assert_raise SystemExit do
+          @core.package_gems
+        end
       end
 
       should "create a tarball of the application's source files" do
