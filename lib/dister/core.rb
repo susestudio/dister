@@ -421,6 +421,9 @@ module Dister
       when "SLED11_SP1", "SLES11_SP1", "SLES11_SP1_VMware"
         url += "SLE_11_SP1"
         name += " SLE11 SP1"
+      when "SLES11_SP2", "SLES11_SP2"
+        url += "SLE_11_SP2"
+        name += " SLE11 SP2"
       else
         STDERR.puts "#{appliance.basesystem}: unknown base system"
         exit 1
